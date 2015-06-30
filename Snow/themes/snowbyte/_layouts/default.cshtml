@@ -1,4 +1,4 @@
-@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<Snow.ViewModels.BaseViewModel>
+﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<Snow.ViewModels.BaseViewModel>
 @using System.Collections.Generic
 @{
     var keywords = String.Join(",", Model.Keywords);
@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width" />
     <meta http-equiv="last-modified" content="@Model.GeneratedDate" />
     <meta name="keywords" content="@keywords" />
-    <title>Snow Byte</title>
+    <title>Бояринцев.Нет</title>
     <link rel="stylesheet" type="text/css" href="/stylesheets/font-awesome/css/font-awesome.min.css" />
     <link rel="stylesheet" type="text/css" href="/stylesheets/style.css" />
     @Html.CanonicalUrl()
@@ -19,8 +19,8 @@
     <div id="page" class="hfeed site">
         <header id="masthead" class="site-header" role="banner">
             <hgroup>
-                <h1 class="site-title"><a href="/" title="Snow Byte" rel="home">Snow Byte</a>
-                <p><small>Minimal Sandra.Snow Theme.</small></p></h1>
+                <h1 class="site-title"><a href="/" title="Продуктивный программист" rel="home">Snow Byte</a>
+                <p><small>Продуктивные заметки о продуктивности</small></p></h1>
             </hgroup>
             <nav role="navigation" class="site-navigation main-navigation">
                 <h1 class="assistive-text">Menu</h1>
