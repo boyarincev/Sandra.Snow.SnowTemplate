@@ -19,7 +19,7 @@
     <ul class="archive">
     @foreach(var post in month.Value)
     {
-      <li><a href="@post.Url">@post.Title</a> (<span>@post.Date.ToString("dd MMM yyyy")</span>)</li>
+      <li><a href="/blog/@post.Url">@post.Title</a> (<span>@post.Date.ToString("dd MMM yyyy")</span>)</li>
     }
     </ul>
   }

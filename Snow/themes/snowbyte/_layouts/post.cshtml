@@ -10,7 +10,7 @@
         <p class="posted">@Model.PostDate.ToString("dd MMM yyyy")</p>
         <ul class="categories">
         @foreach(var category in Model.Categories) {
-          <li><a href="/category/@category.Url" title="@category">@category.Name</a></li>
+          <li><a href="/blog/category/@category.Url" title="@category">@category.Name</a></li>
         }
         </ul>
       </div>
@@ -28,7 +28,7 @@
         
     @Html.Raw(Model.PostContent)
 
-    @Html.RenderDisqusComments("*disqus id*")
+    @Html.RenderDisqusComments("boyarincev.net/blog")
     
     <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-****"></script>
 
