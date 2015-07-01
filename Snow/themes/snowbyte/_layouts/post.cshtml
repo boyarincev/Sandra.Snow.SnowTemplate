@@ -10,7 +10,7 @@
         <p class="posted">@Model.PostDate.ToString("dd MMM yyyy")</p>
         <ul class="categories">
         @foreach(var category in Model.Categories) {
-          <li><a href="/blog/category/@category.Url" title="@category">@category.Name</a></li>
+          <li><a href="/category/@category.Url" title="@category">@category.Name</a></li>
         }
         </ul>
       </div>

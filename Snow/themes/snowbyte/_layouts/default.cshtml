@@ -1,4 +1,4 @@
-@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<Snow.ViewModels.BaseViewModel>
+﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<Snow.ViewModels.BaseViewModel>
 @using System.Collections.Generic
 @{
     var keywords = String.Join(",", Model.Keywords);
@@ -10,16 +10,16 @@
     <meta name="viewport" content="width=device-width" />
     <meta http-equiv="last-modified" content="@Model.GeneratedDate" />
     <meta name="keywords" content="@keywords" />
-    <title>Безудержное веселье</title>
-    <link rel="stylesheet" type="text/css" href="/blog/stylesheets/font-awesome/css/font-awesome.min.css" />
-    <link rel="stylesheet" type="text/css" href="/blog/stylesheets/style.css" />
+    <title>Бояринцев.Нет</title>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/font-awesome/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="/stylesheets/style.css" />
     @Html.CanonicalUrl()
 </head>
 <body class="home blog">
     <div id="page" class="hfeed site">
         <header id="masthead" class="site-header" role="banner">
             <hgroup>
-                <h1 class="site-title"><a href="/blog/" title="Продуктивный программист" rel="home">Snow Byte</a>
+                <h1 class="site-title"><a href="/" title="Блог продуктивного программиста" rel="home">Блог продуктивного программиста</a>
                 <p><small>Продуктивные заметки о продуктивности</small></p></h1>
             </hgroup>
             <nav role="navigation" class="site-navigation main-navigation">
@@ -27,12 +27,12 @@
                 <div class="assistive-text skip-link"><a href="#content" title="Skip to content">Skip to content</a></div>
                 <div class="menu">
                     <ul>
-                        <li><a href="/blog/" class="home"><i class="fa fa-home"></i></a></li>
-                        <li><a href="/blog/about">About</a></li>
-                        <li><a href="/blog/category">Categories</a></li>
-                        <li><a href="/blog/archive">Archive</a></li>
-                        <li><a href="/blog/rss.xml">RSS</a></li>
-                        <li><a href="/blog/feed.xml">Atom</a></li>
+                        <li><a href="/" class="home"><i class="fa fa-home"></i></a></li>
+                        <li><a href="/about">About</a></li>
+                        <li><a href="/category">Categories</a></li>
+                        <li><a href="/archive">Archive</a></li>
+                        <li><a href="/rss.xml">RSS</a></li>
+                        <li><a href="/feed.xml">Atom</a></li>
                     </ul>
                 </div>
             </nav>

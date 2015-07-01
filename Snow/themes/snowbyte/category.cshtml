@@ -13,7 +13,7 @@
   <ul class="category-list">
     @foreach(var catInPost in Model.PostsInCategory){
       <li>
-        <a href="/blog/@catInPost.Url" title="@catInPost.Title">@catInPost.Title</a> 
+        <a href="@catInPost.Url" title="@catInPost.Title">@catInPost.Title</a> 
         <small>(@catInPost.Date.ToString("dd MMM yyyy"))</small>
       </li>
     }
