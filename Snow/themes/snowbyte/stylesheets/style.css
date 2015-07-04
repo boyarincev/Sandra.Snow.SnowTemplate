@@ -71,7 +71,7 @@ body, button, input, select, textarea {
 
 h1, h2, h3, h4, h5, h6 {
     clear: both;
-    font-family: 'Source Sans Pro', sans-serif;
+    font-family: sans-serif;
 }
 
 hr {
