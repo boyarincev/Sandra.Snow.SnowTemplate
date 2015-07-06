@@ -3,7 +3,7 @@ layout: post
 title: Как .Net хранит объекты в памяти
 date: 2015-07-6 15:37
 comments: true
-categories: Память в .Net
+categories: memory in .Net
 published: true
 
 ---
