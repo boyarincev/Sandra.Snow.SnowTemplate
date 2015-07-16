@@ -32,10 +32,5 @@ http://stackoverflow.com/questions/355261/whats-the-difference-between-system-we
 
 https://msdn.microsoft.com/ru-ru/library/284c1c4s(v=vs.90).aspx
 
-##Стандартные модули используемые в Asp .Net##
-| Tables        | Are           | Cool  |
-| ------------- |:-------------:| -----:|
-| col 3 is      | right-aligned | $1600 |
-| col 2 is      | centered      |   $12 |
-| zebra stripes | are neat      |    $1 |
+##Стандартные модули используемые Asp .Net##
 
