@@ -2,7 +2,7 @@
 layout: post
 title: Ковариация и контрвариация C#
 categories: C#
-published: draft
+published: public
 ---
 
 В этой статье я бы хотел дать свое объяснение как работает ковариация и контрвариация в C#.
