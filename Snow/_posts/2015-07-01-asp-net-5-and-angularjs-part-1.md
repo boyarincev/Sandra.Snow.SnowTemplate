@@ -21,15 +21,15 @@ https://github.com/boyarincev/GetHabitsAspNet5
 
 После того, как вы установите Visual Studio 2015, выберите File, New, Project, затем в разделе Templates, Visual C#, Web выберите ASP.NET Web Application и назовите новый проект "GetHabitsAspNet5"
 
-![Создаем новый Asp.NET 5 проект](/images/asp-net-5/part1/create-new-project.jpeg)
+![Создаем новый Asp.NET 5 проект](/images/asp-net-5/part1/create-new-project.jpg)
 
 Выберите, Empty шаблон в разделе ASP.NET 5 Preview Templates
 
-![Выбираем Empty Template](/images/asp-net-5/part1/choose-empty-template.jpeg)
+![Выбираем Empty Template](/images/asp-net-5/part1/choose-empty-template.jpg)
 
 После того, как студия закончит генерацию шаблона, вы получите пустой ASP.NET 5 проект.
 
-![Empty шаблон в Solution Explorer](/images/asp-net-5/part1/empty-project-sol-explorer.jpeg)
+![Empty шаблон в Solution Explorer](/images/asp-net-5/part1/empty-project-sol-explorer.jpg)
 
 Шаблон ASP.NET 5 значительно отличается от предыдущих версий. Теперь солюшен разделен на две папки, первая "Solution Items", вторая "src". Папка src содержит сам проект GetHabitsAspNet5.
 
@@ -37,7 +37,7 @@ GetHabitsAspNet5 проект содержит специальную папку
 
 Давайте в корне проекта GetHabitsAspNet5 создадим папку Scripts - в ней мы будем хранить все javascript файлы.
 
-![Создаем папку Scripts](/images/asp-net-5/part1/script-folder.jpeg)
+![Создаем папку Scripts](/images/asp-net-5/part1/script-folder.jpg)
 
 Вероятно раньше, для объединения и минификации javascript вы использовали механизм бандлов из ASP.NET MVC или использовали функции расширения WebEssentials, но теперь, с нативной поддержкой Grunt, мы можем всю подготовку фронтенда делать с помощью него.
 
