@@ -27,7 +27,7 @@
     @Html.RenderSeries()
         
     @Html.Raw(Model.PostContent)
-    @if (Model.Published.True)
+    @if (Model.Published == Published.True)
     {
         @Html.RenderDisqusComments("boyarincev")
     }
