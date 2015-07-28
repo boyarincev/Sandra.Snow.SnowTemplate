@@ -27,8 +27,10 @@
     @Html.RenderSeries()
         
     @Html.Raw(Model.PostContent)
-
-    @Html.RenderDisqusComments("boyarincev")
+    @if (Model.Published.True)
+    {
+        @Html.RenderDisqusComments("boyarincev")
+    }
     
     <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-****"></script>
 
