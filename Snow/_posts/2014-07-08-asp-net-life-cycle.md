@@ -18,7 +18,9 @@ published: public
 1. Когда получен первый запрос любого ресурса приложения, экземпляр класса [ApplicationManager](https://msdn.microsoft.com/en-us/library/system.web.hosting.applicationmanager) создает Домен приложений, для запуска нашего приложения - каждое приложение Asp .Net загружается в собственный домен приложений и работает в нем - это предоставляет необходимый уровень изоляции приложений запущенных на одном сервере.
 
 2. В пределах этого домена приложений, создается инстанс класса [HostingEnvironment](https://msdn.microsoft.com/en-us/library/system.web.hosting.hostingenvironment), который предоставляет доступ к информации о нашем приложении, такой как имя и папка, где приложение находится.
+
 <!--excerpt-->
+
 ![Получен первый запрос ресурса нашего Asp .Net приложения](/images/2014-07-08-asp-net-dlya-asp-net-mvc-developers-app-life-cycle/app-manager.gif)
 
 ###Созданы объекты ядра (происходит для каждого запроса)###
