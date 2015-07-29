@@ -14,6 +14,7 @@ published: draft
 [https://github.com/boyarincev/GetHabitsAspNet5](https://github.com/boyarincev/GetHabitsAspNet5)
 
 В этом посте я опишу как подготовить Asp .Net 5 проект к разработке, в частности, как настроить Grunt на минификацию и объединение javascript файлов автоматически.
+<!--excerpt-->
 
 ##Содаем Asp .Net 5 проект##
 
