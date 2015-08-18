@@ -8,7 +8,7 @@ published: draft
 Давайте разберемся, какие изменения произошли в системе роутинга в ASP.NET 5 по-сравнению с предыдущими версиями.
 
 ##Как была огранизована система маршутизации до ASP.NET 5##
-
+Маршрутизация до ASP.NET 5 осуществлялась с помощью ASP.NET модуля [UrlRoutingModule](https://msdn.microsoft.com/en-us/library/system.web.routing.urlroutingmodule(v=vs.100).aspx). Модуль проходил через коллекцию маршрутов (как правило объектов класса [Route](https://msdn.microsoft.com/en-us/library/system.web.routing.route(v=vs.110).aspx)) хранящихся в статическом свойстве `Routes` класса [RouteTable](https://msdn.microsoft.com/en-us/library/system.web.routing.routetable(v=vs.110).aspx), выбирал маршрут, который подходил под текущий запрос и вызывал обработчик маршрутов, связанный с этим маршрутом (хранился в свойстве `RouteHandler` объекта `Route`) - в MVC приложении этим обработчиком был
 
 ##Как организована система маршрутизации в ASP.NET 5##
 RouteAsync
