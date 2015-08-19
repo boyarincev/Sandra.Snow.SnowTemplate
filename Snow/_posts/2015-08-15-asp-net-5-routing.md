@@ -8,9 +8,9 @@ published: draft
 Давайте разберемся, какие изменения произошли в системе роутинга в ASP.NET 5 по-сравнению с предыдущими версиями.
 
 ##Как была огранизована система маршутизации до ASP.NET 5##
-Маршрутизация до ASP.NET 5 осуществлялась с помощью ASP.NET модуля [UrlRoutingModule](https://msdn.microsoft.com/en-us/library/system.web.routing.urlroutingmodule(v=vs.100).aspx). Модуль проходил через [коллекцию](https://msdn.microsoft.com/en-us/library/system.web.routing.routecollection(v=vs.100).aspx) маршрутов (как правило объектов класса [Route](https://msdn.microsoft.com/en-us/library/system.web.routing.route(v=vs.110).aspx)) хранящихся в статическом свойстве `Routes` класса [RouteTable](https://msdn.microsoft.com/en-us/library/system.web.routing.routetable(v=vs.110).aspx), выбирал маршрут, который подходил под текущий запрос и вызывал обработчик маршрутов, связанный с этим маршрутом (хранился в свойстве `RouteHandler` объекта `Route`) - в MVC Framework приложении этим обработчиком был [MvcRouteHandler](https://msdn.microsoft.com/en-us/library/system.web.mvc.mvcroutehandler(v=vs.118).aspx), который брал на себя дальнейшую работу с запросом.
+Маршрутизация до ASP.NET 5 осуществлялась с помощью ASP.NET модуля [UrlRoutingModule](https://msdn.microsoft.com/en-us/library/system.web.routing.urlroutingmodule(v=vs.100).aspx). Модуль проходил через [коллекцию](https://msdn.microsoft.com/en-us/library/system.web.routing.routecollection(v=vs.100).aspx) маршрутов (как правило объектов класса [Route](https://msdn.microsoft.com/en-us/library/system.web.routing.route(v=vs.110).aspx)) хранящихся в статическом свойстве `Routes` класса [RouteTable](https://msdn.microsoft.com/en-us/library/system.web.routing.routetable(v=vs.110).aspx), выбирал маршрут, который подходил под текущий запрос и вызывал обработчик маршрутов, связанный с этим маршрутом (хранился в свойстве `RouteHandler` объекта `Route`) - в MVC приложении этим обработчиком был [MvcRouteHandler](https://msdn.microsoft.com/en-us/library/system.web.mvc.mvcroutehandler(v=vs.118).aspx), который брал на себя дальнейшую работу с запросом.
 
-Типичный пример настройки системы маршрутизации в MVC приложении выглядел так:
+Маршруты в коллекцию `RouteTable.Routes` мы добавляли в процессе настройки приложения. Вот стандартный код настройки системы маршрутизации в MVC приложении:
 
 	RouteTable.Routes.MapRoute(
 	                name: "Default",
@@ -18,7 +18,7 @@ published: draft
 	                defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
 	            );
 
-Где `MapRoute` - extension метод, объявленный в пространстве имен `System.Web.Mvc`, который добавляет в коллекцию маршрутов в свойстве `Route` новый маршрут используя `MvcRouteHandler` в качестве обработчика.
+Где `MapRoute` - extension-метод, объявленный в пространстве имен `System.Web.Mvc`, который добавляет в коллекцию маршрутов в свойстве `Route` новый маршрут используя `MvcRouteHandler` в качестве обработчика.
 
 Мы можем сделать это и самостоятельно:
 
