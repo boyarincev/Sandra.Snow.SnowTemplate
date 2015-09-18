@@ -273,8 +273,6 @@ ASP.NET 5 больше не использует модули, для обраб
 	                      new { foo = "Bar" }, //defaults
 	                      new { controller = new RegexRouteConstraint("^(my.*)$") }); //constraints
 
-добавить пример
-
 ##Attribute-Based маршрутизация##
 
 В отличии от MVC 5, где маршрутизацию с помощью атрибутов, нужно было специально подключать, в MVC 6 она включена по-умолчанию.
