@@ -37,11 +37,9 @@ ASP.NET 5 больше не использует модули, для обраб
 
 ##Как организована система маршрутизации в ASP.NET 5: Длинный вариант##
 
-Я понимаю, что эта часть может быть интересна далеко не всем, если вам не интересно внутреннее устройство `RouterMiddleware`, то просто переходите к следующей части.
+Для того, чтобы разобраться как система маршрутизации работает, давайте подключим ее к пустому проекту ASP.NET 5.
 
-Для того, чтобы разобраться как система маршрутизации работает, давайте подключим ее к пустому проекту, создайте новый пустой проект ASP.NET 5 (выбрав Empty Template при создании).
-
-Что нам нужно сделать, чтобы подключить систему маршрутизации к нашему пустому приложению?
+0. Cоздайте пустой проект ASP.NET 5 (выбрав Empty Template) и назовите его "AspNet5Routing".
 
 1. Добавляем в зависимости ("dependencies") проекта в файле project.json "Microsoft.AspNet.Routing":
 	  
@@ -83,26 +81,39 @@ ASP.NET 5 больше не использует модули, для обраб
     routeBuilder.DefaultHandler = new ASPNET5RoutingHandler();
     routeBuilder.ServiceProvider = app.ApplicationServices;
 
-Создаем некий объект `RouteBuilder` и заполняем его свойства. Интерес вызывает свойство `DefaultHandler` с типом [IRouter](https://github.com/aspnet/Routing/blob/master/src/Microsoft.AspNet.Routing/IRouter.cs) - судя по названию оно должно содержать обработчик запроса. Я помещаю в него экземпляр `ASPNET5RoutingHandler` - придуманного мною обработчика запросов, давайте создадим его:
+Создаем экземпляр `RouteBuilder` и заполняем его свойства. Интерес вызывает свойство `DefaultHandler` с типом [IRouter](https://github.com/aspnet/Routing/blob/master/src/Microsoft.AspNet.Routing/IRouter.cs) - судя по названию оно должно содержать обработчик запроса. Я помещаю в него экземпляр `ASPNET5RoutingHandler` - придуманного мною обработчика запросов, давайте создадим его:
 
-    public class ASPNET5RoutingHandler : IRouter
-    {
-        public VirtualPathData GetVirtualPath(VirtualPathContext context)
-        {
-            
-        }
+	using Microsoft.AspNet.Routing;
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using System.Threading.Tasks;
+	using Microsoft.AspNet.Http;
 
-        public async Task RouteAsync(RouteContext context)
-        {
-            
-        }
-    }
+	namespace AspNet5Routing
+	{
+	    public class ASPNET5RoutingHandler : IRouter
+	    {
+	        public VirtualPathData GetVirtualPath(VirtualPathContext context)
+	        {
+	            
+	        }
+	
+	        public async Task RouteAsync(RouteContext context)
+	        {
+	            await context.HttpContext.Response.WriteAsync("ASPNET5RoutingHandler work");
+	            context.IsHandled = true;
+	        }
+	    }
+	}
 
 Интерфейс `IRouter` требует от нас только два метода `GetVirtualPath` и `RouteAsync`.
 
 Метод `GetVirtualPath` - нам знаком из предыдущих версий ASP.NET он был в интерфейсе класса [RouteBase](https://msdn.microsoft.com/en-us/library/system.web.routing.routebase(v=vs.110).aspx) от которого наследовался класс [Route](https://msdn.microsoft.com/en-us/library/system.web.routing.route(v=vs.110).aspx) представляющий собой маршрут. Этот метод отвечал за построение Url (например, когда мы вызывали метод ActionLink: `@Html.ActionLink("link", "Index")`).
 
-Следующая строка:
+А в методе `RouteAsync` - мы обрабатываем запрос и записываем результат обработки в `Response`.
+
+Следующая строка метода `Configure`:
 
 	routeBuilder.MapRoute("default", "{controller}/{action}/{id}");
 
@@ -144,7 +155,9 @@ ASP.NET 5 больше не использует модули, для обраб
 
 Наш обработчик запроса `ASPNET5RoutingHandler` упакован в `TemplateRoute`, сам `TemplateRoute` или несколько экземпляров `TemplateRoute` (если бы мы несколько раз вызвали метод `MapRoute()`) упакованы в `RouteCollection`, а `RouteCollection` передан в конструктор `RouterMiddleware` и сохранен в нем.  
 
-На этом процесс настройки системы маршрутизации завершен, давайте теперь проследим путь входящего запроса:
+На этом процесс настройки системы маршрутизации завершен, можно запустить проект, перейти по адресу: "/Home/Index/1" и увидеть результат: "ASPNET5RoutingHandler work".
+ 
+Ну и кратко пройдемся по тому, что происходит, с системой маршрутизации во время входящего запроса:
 
 Когда очередь доходит до `RouterMiddleware`, в списке запускаемых middleware, оно вызывает метод `RouteAsync()` у сохраненного экземпляра `IRouter` - это объект класса `RouteCollection`.
 
@@ -338,12 +351,14 @@ ASP.NET 5 больше не использует модули, для обраб
 - Переменные части сегмента берутся в фигурные скобки: `firstSegment/{secondSegment}` - шаблон будет соответствовать любым двух сегментным адресам, где первый сегмент: "firstSegment", а второй сегмент может быть любым набором символов (кроме слеша - так как это будет обозначать начало третьего сегмента):
 	"/firstSegment/index"
 	"/firstSegment/index-2"
+- Ограничения для переменной части сегмента, как это следует из названия - ограничивают допустимые значения переменного сегмента и задаются после символа ":". На одну переменную часть можно наложить несколько ограничений, параметры передаются с использованием круглых скобок: `firstSegment/{secondSegment:minlength(1):maxlength(3)}`.
+Строковое обозначение ограничений можно посмотреть в [методе `GetDefaultConstraintMap()` класса RouteOptions](https://github.com/aspnet/Routing/blob/master/src/Microsoft.AspNet.Routing/RouteOptions.cs).
+- Для того, чтобы сделать последний сегмент "жадным", так что он будет поглощать всю оставшуюся строку адреса, нужно использовать символ `*`: `{controller}/{action}/{*allRest}`  - будет соответствовать как адресу: "/home/index/2", так и адресу: "/home/index/2/4/5".
 
 Но в ASP.NET 5 шаблон маршрута получил некоторые дополнительные возможности: 
 
 1. Возможность задавать прямо в нем значения по-умолчанию для переменных частей маршрута: `{controller=Home}/{action=Index}`.
 2. Задавать не обязательность переменной части сегмента с помощью символа `?`: `{controller=Home}/{action=Index}/{id?}`.
-3. Сделать последний сегмент "жадным", так что она будет поглощать всю оставшуюся строку адреса: `{controller}/{action}/{*allRest}`  - будет соответствовать как адресу: "/home/index/2", так и адресу: "/home/index/2/4-52".
 
 Также при использовании шаблона маршрута в атрибутах, произошли изменения:
 
@@ -366,12 +381,10 @@ ASP.NET 5 больше не использует модули, для обраб
 	Route("[controller?]/[action]")
 	Route("[controller]/[*action]")
 
-Использование ограничений не изменилось. Строковое обозначение ограничений можно посмотреть в классе [RouteOptions](https://github.com/aspnet/Routing/blob/master/src/Microsoft.AspNet.Routing/RouteOptions.cs).
-
 Общая схема шаблона маршрута выглядит так:
 
-	constantPart{variablePart}/{paramName:constraint1:constraint2=DefaultValue?}/{*lastGreedySegment}
+	constantPart-{variablePart}/{paramName:constraint1:constraint2=DefaultValue?}/{*lastGreedySegment}
 
 Заключение:
 
-Система маршрутизации в ASP.NET 5 претерпела большие внутренние архитектурные изменения, однако для пользователей глобальных изменений не произошло. Вместе с тем, появились новые возможности в части использования шаблонов маршрута, позволяющие с большей лаконичностью задать прямо в нем различные параметры маршрута. А также возможность задавать общие настройки для системы маршрутизации, с помощью механизма опций ASP.NET 5.
+В этой статье, мы пробежались по системе маршрутизации ASP.NET 5, посмотрели как она организована и подключили ее к пустому проекту ASP.NET 5, используя свой обработчик маршрута. Разобрали способы ее подключения к MVC приложению и настройке с помощью механизма Опций. Остановились на изменениях, которые произошли в использовании Attribute-Based маршрутизации и шаблоне маршрута.
