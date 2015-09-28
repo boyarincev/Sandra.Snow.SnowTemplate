@@ -8,11 +8,11 @@ published: draft
 Сегодня мы посмотрим на систему маршрутизации в ASP.NET 5.
 
 ##Как была организована система маршрутизации до ASP.NET 5##
-Маршрутизация до ASP.NET 5 осуществлялась с помощью ASP.NET модуля [UrlRoutingModule](https://msdn.microsoft.com/en-us/library/system.web.routing.urlroutingmodule(v=vs.100).aspx). Модуль проходил через [коллекцию](https://msdn.microsoft.com/en-us/library/system.web.routing.routecollection(v=vs.100).aspx) маршрутов (как правило объектов класса [Route](https://msdn.microsoft.com/en-us/library/system.web.routing.route(v=vs.110).aspx)) хранящихся в статическом свойстве `Routes` класса [RouteTable](https://msdn.microsoft.com/en-us/library/system.web.routing.routetable(v=vs.110).aspx), выбирал маршрут, который подходил под текущий запрос и вызывал обработчик маршрутов, связанный с этим маршрутом (хранился в свойстве `RouteHandler` класса `Route` - то есть каждый зарегистрированный маршрут мог иметь собственный обработчик запроса) - в MVC приложении этим обработчиком был [MvcRouteHandler](https://msdn.microsoft.com/en-us/library/system.web.mvc.mvcroutehandler(v=vs.118).aspx), который брал на себя дальнейшую работу с запросом.
+Маршрутизация до ASP.NET 5 осуществлялась с помощью ASP.NET модуля [UrlRoutingModule](https://msdn.microsoft.com/en-us/library/system.web.routing.urlroutingmodule(v=vs.100).aspx). Модуль проходил через [коллекцию](https://msdn.microsoft.com/en-us/library/system.web.routing.routecollection(v=vs.100).aspx) маршрутов (как правило объектов класса [Route](https://msdn.microsoft.com/en-us/library/system.web.routing.route(v=vs.110).aspx)) хранящихся в статическом свойстве `Routes` класса [RouteTable](https://msdn.microsoft.com/en-us/library/system.web.routing.routetable(v=vs.110).aspx), выбирал маршрут, который подходил под текущий запрос и вызывал обработчик маршрута, который хранился в свойстве `RouteHandler` класса `Route` - каждый зарегистрированный маршрут мог иметь собственный обработчик. В MVC-приложении этим обработчиком был [MvcRouteHandler](https://msdn.microsoft.com/en-us/library/system.web.mvc.mvcroutehandler(v=vs.118).aspx), который брал на себя дальнейшую работу с запросом.
 
 Маршруты в коллекцию `RouteTable.Routes` мы добавляли в процессе настройки приложения. 
 
-Стандартный код настройки системы маршрутизации в MVC приложении:
+Типичный код настройки системы маршрутизации в MVC приложении:
 
 	RouteTable.Routes.MapRoute(
 	                name: "Default",
@@ -20,9 +20,9 @@ published: draft
 	                defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
 	            );
 
-Где [MapRoute](https://msdn.microsoft.com/ru-ru/library/Dd470521(v=VS.118).aspx) - extension-метод, объявленный в пространстве имен `System.Web.Mvc`, который "за кулисами" добавлял в коллекцию маршрутов в свойстве `Routes` новый маршрут используя `MvcRouteHandler` в качестве обработчика.
+Где [MapRoute](https://msdn.microsoft.com/ru-ru/library/Dd470521(v=VS.118).aspx) - extension-метод, объявленный в пространстве имен `System.Web.Mvc`, который добавлял в коллекцию маршрутов в свойстве `Routes` новый маршрут используя `MvcRouteHandler` в качестве обработчика.
 
-Мы могли делать это и самостоятельно:
+Мы могли бы сделать это и самостоятельно:
 
     RouteTable.Routes.Add(new Route(
         url: "{controller}/{action}/{id}",
@@ -67,9 +67,7 @@ ASP.NET 5 больше не использует модули, для обраб
             var routeBuilder = new RouteBuilder();
             routeBuilder.DefaultHandler = new ASPNET5RoutingHandler();
             routeBuilder.ServiceProvider = app.ApplicationServices;
-
             routeBuilder.MapRoute("default", "{controller}/{action}/{id}");
-
             app.UseRouter(routeBuilder.Build());
         }
 
@@ -117,7 +115,7 @@ ASP.NET 5 больше не использует модули, для обраб
 
 	routeBuilder.MapRoute("default", "{controller}/{action}/{id}");
 
-Как две капли воды, похожа на использование метода MapRoute в MVC 5, его параметры - название добавляемого маршрута и шаблон с которым будет сопоставляться запрашиваемый Url.
+Как две капли воды, похожа на использование метода `MapRoute` в MVC 5, его параметры - название добавляемого маршрута и шаблон с которым будет сопоставляться запрашиваемый Url.
 
 Сам `MapRoute()` также как и в MVC 5 - [extension-метод](https://github.com/aspnet/Routing/blob/master/src/Microsoft.AspNet.Routing/RouteBuilderExtensions.cs), а его вызов в итоге сводится к Созданию экземпляра класса [TemplateRoute](https://github.com/aspnet/Routing/blob/master/src/Microsoft.AspNet.Routing/Template/TemplateRoute.cs) и добавлению его в коллекцию `Routes` нашего объекта `RouteBuilder`:
 
@@ -137,7 +135,7 @@ ASP.NET 5 больше не использует модули, для обраб
 
 Вызов `routeBuilder.Build()` - создает экземпляр класса [RouteCollection](https://github.com/aspnet/Routing/blob/master/src/Microsoft.AspNet.Routing/RouteCollection.cs) и добавляет в него все элементы из свойства `Route` класса `RouteBuilder`.
 
-А `app.UseRouter()` - [оказывается](https://github.com/aspnet/Routing/blob/master/src/Microsoft.AspNet.Routing/BuilderExtensions.cs) extensionметодом, который на самом деле, подключает [RouterMiddleware](https://github.com/aspnet/Routing/blob/master/src/Microsoft.AspNet.Routing/RouterMiddleware.cs) в pipeline обработки запроса, передавая ему созданный и заполненный в методе `Build()` объект `RouteCollection`.
+А `app.UseRouter()` - [оказывается](https://github.com/aspnet/Routing/blob/master/src/Microsoft.AspNet.Routing/BuilderExtensions.cs) extension-методом, который на самом деле, подключает [RouterMiddleware](https://github.com/aspnet/Routing/blob/master/src/Microsoft.AspNet.Routing/RouterMiddleware.cs) в pipeline обработки запроса, передавая ему созданный и заполненный в методе `Build()` объект `RouteCollection`.
 
 	public static IApplicationBuilder UseRouter([NotNull] this IApplicationBuilder builder, [NotNull] IRouter router)
 	{
@@ -151,7 +149,9 @@ ASP.NET 5 больше не использует модули, для обраб
         ILoggerFactory loggerFactory,
         IRouter router)
 
-Объект `RouteCollection` тоже реализует интерфейс `IRouter`, как и `ASPNET5RoutingHandler` c `TemplateRoute`. Итого у нас получилась следующая матрешка:
+Объект `RouteCollection` тоже реализует интерфейс `IRouter`, как и `ASPNET5RoutingHandler` c `TemplateRoute`.
+
+Итого у нас получилась следующая матрешка:
 
 Наш обработчик запроса `ASPNET5RoutingHandler` упакован в `TemplateRoute`, сам `TemplateRoute` или несколько экземпляров `TemplateRoute` (если бы мы несколько раз вызвали метод `MapRoute()`) упакованы в `RouteCollection`, а `RouteCollection` передан в конструктор `RouterMiddleware` и сохранен в нем.  
 
@@ -276,7 +276,7 @@ ASP.NET 5 больше не использует модули, для обраб
 
 Делает тоже самое, что и мы в предыдущем разделе при регистрации маршрута для своего обработчика, только устанавливает в качестве конечного обработчика экземпляр `MvcRouteHandler` и делает вызов метода `CreateAttributeMegaRoute` - который отвечает за добавление маршрутов устанавливаемых с помощью атрибутов у контроллеров и методов действий (Attribute-Based маршрутизация).
 
-Таким образом все три метода, будут включать в наше приложение Attribute-Based маршрутизацию, но кроме этого, вызов второго метода будет добавлять дефолтный маршрут, а третий метода, позволяет задать любые нужные нам маршруты передав их с помощью делегата (Convention-Based маршрутизация).
+Таким образом все три метода, будут включать в наше приложение Attribute-Based маршрутизацию, но кроме этого, вызов второго метода будет добавлять дефолтный маршрут, а третий метод, позволяет задать любые нужные нам маршруты передав их с помощью делегата (Convention-Based маршрутизация).
 
 ##Convention-Based маршрутизация##
 
@@ -289,7 +289,7 @@ ASP.NET 5 больше не использует модули, для обраб
 
 ##Attribute-Based маршрутизация##
 
-В отличии от MVC 5, где маршрутизацию с помощью атрибутов, нужно было специально вдключать, в MVC 6 она включена по-умолчанию.
+В отличии от MVC 5, где маршрутизацию с помощью атрибутов, нужно было специально включать, в MVC 6 она включена по-умолчанию.
 
 Следует также помнить, что маршруты определяемые с помощью атрибутов, имеют приоритет при поиске совпадений и выборе подходящего маршрута (по-сравнению с convention-based маршрутами).
 
@@ -349,7 +349,9 @@ ASP.NET 5 больше не использует модули, для обраб
 - Сегменты адреса разделены слешем: `firstSegment/secondSegment`.
 - Константной часть сегмента считается, если она не окаймлена фигурными скобками, соответствие такого маршрута запрашиваемому Url, происходит только если в адресе присутствуют точно такие же значения: `firstSegment/secondSegment` - такой маршрут соответствует только адресу вида: `siteDomain/firstSegment/secondSegment`.
 - Переменные части сегмента берутся в фигурные скобки: `firstSegment/{secondSegment}` - шаблон будет соответствовать любым двух сегментным адресам, где первый сегмент: "firstSegment", а второй сегмент может быть любым набором символов (кроме слеша - так как это будет обозначать начало третьего сегмента):
+
 	"/firstSegment/index"
+
 	"/firstSegment/index-2"
 - Ограничения для переменной части сегмента, как это следует из названия - ограничивают допустимые значения переменного сегмента и задаются после символа ":". На одну переменную часть можно наложить несколько ограничений, параметры передаются с использованием круглых скобок: `firstSegment/{secondSegment:minlength(1):maxlength(3)}`.
 Строковое обозначение ограничений можно посмотреть в [методе `GetDefaultConstraintMap()` класса RouteOptions](https://github.com/aspnet/Routing/blob/master/src/Microsoft.AspNet.Routing/RouteOptions.cs).
