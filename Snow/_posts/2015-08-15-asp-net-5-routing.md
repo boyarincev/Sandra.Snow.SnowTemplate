@@ -2,8 +2,10 @@
 layout: post
 title: Маршрутизация в ASP.NET 5
 categories: ASP-NET-5
-published: draft
+published: public
 ---
+
+>Эта статья была опубликована в корпоративном блоге Microsoft на habrahabr.ru: [Ссылка](http://habrahabr.ru/company/microsoft/blog/268037/).
 
 Сегодня мы посмотрим на систему маршрутизации в ASP.NET 5.
 
@@ -21,6 +23,8 @@ published: draft
 	            );
 
 Где [MapRoute](https://msdn.microsoft.com/ru-ru/library/Dd470521(v=VS.118).aspx) - extension-метод, объявленный в пространстве имен `System.Web.Mvc`, который добавлял в коллекцию маршрутов в свойстве `Routes` новый маршрут используя `MvcRouteHandler` в качестве обработчика.
+
+<!--excerpt-->
 
 Мы могли бы сделать это и самостоятельно:
 
