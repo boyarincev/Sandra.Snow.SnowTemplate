@@ -15,7 +15,7 @@ DNX базируется на том же самом .NET CLR и базовой 
 
 Логически DNX имеет пять слоев функциональности. Я опишу каждый из этих слоев и их обязанности.
 
-##Слой первый: Нативный процесс## 
+## Слой первый: Нативный процесс ## 
 
 Нативный процесс - это очень тонкий слой с обязанностью найти и вызвать нативный CLR host, передав в него аргументы переданные в сам процесс. В Windows - это dnx.exe (находится в %YOUR_PROFILE%\.dnx\runtimes\%CHOOSEN_RUNTIME%); В Mac и Linux - это запускаемый bash script. [Запуск на IIS](https://docs.asp.net/en/latest/publishing/iis.html) происходит с помощью нативного HTTP-модуля: [HTTPPlatformHandler](https://azure.microsoft.com/en-us/blog/announcing-the-release-of-the-httpplatformhandler-module-for-iis-8/), который нужно установить на IIS. Использование HTTPPlatformHandler позволяет запускать веб-приложение без любых зависимостей от .NET Framework (естественно при запуске веб-приложений нацеленных на .NET Core а не на полный .NET Framework).
 
