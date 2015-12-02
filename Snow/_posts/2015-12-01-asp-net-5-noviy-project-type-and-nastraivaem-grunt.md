@@ -2,7 +2,7 @@
 layout: post
 title: ASP.NET 5: Новый тип проекта и работа с Grunt
 categories: ASP-NET-5, Grunt
-published: draft
+published: public
 ---
 
 В этом посте я опишу новый проект веб-приложения ASP.NET 5, а также расскажу о настройке и использовании Grunt в нем.
