@@ -7,17 +7,17 @@ published: draft
 
 ## .NET Runtime Environment (DNX) ##
 
-ASP.NET базируется на гибком, кроссплатформенном Runtime хосте, который может работать с разными .NET CLR (.NET Core, Mono, .NET Framework). Вы можете запустить ASP.NET 5 на полном .NET Framework или можете запустить на новом [.NET Core](https://docs.asp.net/en/latest/conceptual-overview/dotnetcore.html), который позволяет вам просто копировать его в существующее окружение, без изменения чего-либо еще на вашей машине. Используя .NET Core вы также можете запустить ASP.NET 5 кроссплатформенно на Linux и Mac OS.
+ASP.NET базируется на гибком, кроссплатформенном Runtime, который может работать с разными .NET CLR (.NET Core, Mono, .NET Framework). Вы можете запустить ASP.NET 5 на полном .NET Framework или можете запустить на новом [.NET Core](https://docs.asp.net/en/latest/conceptual-overview/dotnetcore.html), который позволяет вам просто копировать его в существующее окружение, без изменения чего-либо еще на вашей машине. Используя .NET Core вы также можете запустить ASP.NET 5 кроссплатформенно на [Linux](https://docs.asp.net/en/latest/getting-started/installing-on-linux.html) и [Mac OS](https://docs.asp.net/en/latest/getting-started/installing-on-mac.html).
 
-Инфраструктура позволяющая запускать и исполнять приложения ASP.NET 5 называется [.NET Runtime Environment (DNX)](https://docs.asp.net/en/latest/dnx/overview.html). DNX предоставляет все что необходимо для разработки приложений на .NET: host process, CLR hosting логику, обнаружение управляемой Entry Point и т.д.
+Инфраструктура позволяющая запускать и исполнять приложения ASP.NET 5 называется [.NET Runtime Environment или DNX](https://docs.asp.net/en/latest/dnx/overview.html). DNX предоставляет все что необходимо для разработки приложений на .NET: host process, CLR hosting логику, обнаружение управляемой Entry Point и т.д.
 
 DNX базируется на том же самом .NET CLR и базовой библиотеке классов, что знают и любят существующие .NET разработчики, и в то же время он разработан с возможностью запускать приложения (на данный момент веб и консольные приложения) под операционными системами отличными от Windows.
 
-Логически DNX имеет пять слоев функциональности. Я опишу каждый из этих слоев и их обязанности.
+Логически DNX имеет пять слоев функциональности. Я опишу каждый из этих слоев вместе с их обязанностями.
 
 ## Слой первый: Нативный процесс ## 
 
-Нативный процесс - это очень тонкий слой с обязанностью найти и вызвать нативный CLR host, передав в него аргументы переданные в сам процесс. В Windows - это dnx.exe (находится в %YOUR_PROFILE%/.dnx/runtimes/%CHOOSEN_RUNTIME%); В Mac и Linux - это запускаемый bash script. [Запуск на IIS](https://docs.asp.net/en/latest/publishing/iis.html) происходит с помощью нативного HTTP-модуля: [HTTPPlatformHandler](https://azure.microsoft.com/en-us/blog/announcing-the-release-of-the-httpplatformhandler-module-for-iis-8/), который нужно установить на IIS. Использование HTTPPlatformHandler позволяет запускать веб-приложение без любых зависимостей от .NET Framework (естественно при запуске веб-приложений нацеленных на .NET Core, а не на полный .NET Framework).
+Нативный процесс - это очень тонкий слой с обязанностью найти и вызвать нативный CLR host, передав в него аргументы переданные в сам процесс. В Windows - это dnx.exe (находится в %YOUR_PROFILE%/.dnx/runtimes/%CHOOSEN_RUNTIME%); В Mac и Linux - это запускаемый bash script. [Запуск на IIS](https://docs.asp.net/en/latest/publishing/iis.html) происходит с помощью устанавливаемого на IIS нативного HTTP-модуля: [HTTPPlatformHandler](https://azure.microsoft.com/en-us/blog/announcing-the-release-of-the-httpplatformhandler-module-for-iis-8/). Использование HTTPPlatformHandler позволяет запускать веб-приложение без любых зависимостей от .NET Framework (естественно при запуске веб-приложений нацеленных на .NET Core, а не на полный .NET Framework).
 
 ## Слой второй и третий: Нативный CLR host и CLR ##
 
@@ -97,11 +97,9 @@ DNVM устанавливает DNX'ы из NuGet feed настроенного 
 
 Вызов DLL напрямую - это довольно низкоуровневый подход написания приложений. Вы не используете default application host, поэтому вы отказываетесь и от использования файла project.json и улучшенного NuGet-based механизма управления зависимостями. Вместо этого любые библиотеки от которых вы зависите, будут загружаться из указанных при запуске нативного процесса с помощью параметра `--lib` директорий. До окончания этой статьи я буду использовать default application host.
 
-**Рассказать про доступ к сервисам** 
-
 ## Хостинг ##
 
-В веб-приложениях поверх DNX ApplicationHost работает [слой хостинга](https://docs.asp.net/en/latest/fundamentals/hosting.html). Он ответственен за поиск веб-сервера, логику запуска веб-сайта, размещение сайта на сервере, а затем "уборку за собой", когда приложение выключается. Он также предоставляет приложению некоторые дополнительные, связанные со слоем хостинга сервисы.
+В веб-приложениях поверх DNX ApplicationHost работает [слой хостинга](https://docs.asp.net/en/latest/fundamentals/hosting.html). Он ответственен за поиск веб-сервера, логику запуска веб-сайта, размещение сайта на сервере, а затем "уборку за собой", когда приложение выключается. Он также предоставляет приложению некоторые дополнительные, связанные со слоем хостинга [сервисы](https://github.com/aspnet/Hosting/blob/1.0.0-rc1/src/Microsoft.AspNet.Hosting/WebHostBuilder.cs#L69).
 
 DNX ApplicationHost вызывает [entry point метод](https://github.com/aspnet/Hosting/blob/1.0.0-rc1/src/Microsoft.AspNet.Hosting/Program.cs) [Microsoft.AspNet.Hosting](https://github.com/aspnet/Hosting/tree/1.0.0-rc1/src/Microsoft.AspNet.Hosting). Вы можете настроить какой веб-сервер использовать, указав опцию `--server` или использовав другие способы настройки хостинга, такие как файл hosting.json или environment variables. Слой хостинга загружает указанный сервер и стартует его. Обычно используемый сервер должен быть перечислен в списке зависимостей в файле pfoject.json, чтобы его можно было загрузить.
 
@@ -124,9 +122,11 @@ DNX ApplicationHost вызывает [entry point метод](https://github.com
 
 `dnx.exe --appbase . Microsoft.DNX.ApplicationHost Microsoft.AspNet.Hosting --server Microsoft.AspNet.Server.Kestrel`
 
+> В данный момент, пока еще статья про хостинг в документации docs.asp.net не готова, более подробно про ключи используемые для настройки хостинга можно прочитать [здесь](https://github.com/aspnet/Announcements/issues/108)
+
 ## Startup ##
 
-Слой хостинга также ответственен за запуск стартовой логики вашего приложения. Обычно она находится в Startup классе с Configure методом для настройки request pipeline и ConfigureServices методом для настройки используемых приложением сервисов.
+Слой хостинга также [ответственен за запуск стартовой логики](https://github.com/aspnet/Hosting/blob/1.0.0-rc1/src/Microsoft.AspNet.Hosting/WebApplication.cs#L56) вашего приложения. Обычно она находится в Startup классе с Configure методом для настройки request pipeline и ConfigureServices методом для настройки используемых приложением сервисов.
 
 	namespace WebApplication1
 	{
@@ -211,3 +211,62 @@ Request delegate - это ключевая концепция ASP.NET 5. Request
 ASP.NET 5 поставляется с большим набором встроенных middleware. Есть middleware для работы с [файлами](https://docs.asp.net/en/latest/fundamentals/static-files.html), [маршрутизации](https://docs.asp.net/en/latest/fundamentals/routing.html), обработки ошибок, [диагностики](https://docs.asp.net/en/latest/fundamentals/diagnostics.html) и безопасности. Middleware поставляются как NuGet пакеты через nuget.org.
 
 ## Конфигурирование сервисов ##
+
+В конструктор Startup класса из слоя хостинга могут внедряться сервисы (для этого достаточно запросить их в качестве параметров).
+
+По-умолчанию вам доступны следующие сервисы:
+
+**Необходимо описать сервисы и дать информацию о доступе к ним со слоев ниже хостинга**
+
+Managed Entry Point
+Microsoft.Extensions.PlatformAbstractions.IApplicationEnvironment
+Microsoft.Extensions.PlatformAbstractions.IAssemblyLoaderContainer
+Microsoft.Extensions.PlatformAbstractions.IAssemblyLoadContextAccessor - абстракция для создания контекста загрузчика сборок.
+Microsoft.Extensions.PlatformAbstractions.IRuntimeEnvironment
+
+ApplicationHost
+Microsoft.Dnx.Compilation.ILibraryExporter
+
+Microsoft.Extensions.PlatformAbstractions.IApplicationShutdown
+Microsoft.Extensions.PlatformAbstractions.ILibraryManager
+
+Hosting
+Microsoft.AspNet.Hosting.Startup.IStartupLoader
+Microsoft.AspNet.Hosting.IHostingEnvironment - доступ к Web-root вашего приложения, обычно папка "wwwroot".
+Microsoft.Extensions.Logging.ILoggerFactory
+Microsoft.AspNet.Hosting.Server.IServerLoader
+Microsoft.AspNet.Hosting.Builder.IApplicationBuilderFactory
+Microsoft.AspNet.Http.IHttpContextFactory
+Microsoft.AspNet.Http.IHttpContextAccessor
+
+Вы настраиваете существующие сервисы и добавляете новые в ConfigureServices методе с помощью экземпляра IServiceCollection, принимаемого в качестве параметра. ASP.NET 5 приходит с простым встроенным [IoC-контейнером](https://docs.asp.net/en/latest/fundamentals/dependency-injection.html), но вы легко можете заменить его на любой другой контейнер.
+
+Обычно фреймворки предоставляют Add extension метод для добавления их сервисов в IServiceCollection. Например, добавление сервисов используемых ASP.NET MVC 6 производится так:
+
+	public void ConfigureServices(IServiceCollection services)
+	{
+	  // Добавление MVC сервисов в сервис-контейнер
+	  services.AddMvc();
+	}
+
+Добавляемые сервисы могут быть одними из трех типов: transient, scoped или singleton. Transient сервисы создаются при каждом их запросе из контейнера. Scoped сервисы создаются только если они еще не создавались в текущем scope. В веб-приложениях scope-контейнер создается для каждого запроса, поэтому можно думать о них как о сервисах создаваемых для каждого запроса. Singleton сервисы создаются только один раз за цикл жизни приложения.
+
+## Конфигурирование приложения ##
+
+Web.config и app.config файлы больше не поддерживаются. Вместо них ASP.NET 5 использует новое, упрощенное [Configuration API](https://docs.asp.net/en/latest/fundamentals/configuration.html). Новое Configuration API позволяет получать и устанавливает данные, используя разные источники. Используемый по-умолчанию configuration-провайдер поддерживает JSON, XML, INI, аргументы командной строки и environment variables, установку параметров прямо из кода (in-memory collection). Вы можете указать несколько источников и они будут использоваться в порядке их добавления (добавленные последними будут переопределять настройки добавленных ранее). Также вы [можете иметь разные настройки для каждой среды](https://docs.asp.net/en/latest/fundamentals/environments.html) (test, stage, prod), что облегчает публикацию приложения в разные среды.
+
+Пример настройки Configuration API приведен ниже:
+
+	var builder = new ConfigurationBuilder()
+	            .AddJsonFile("appsettings.json")
+	            .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+				.AddEnvironmentVariables();
+
+    var Configuration = builder.Build();
+
+Запросить данные, вы можете используя метод GetSection и имя настройки:
+
+	var user = Configuration.GetSection("user");
+	var password = Configuration.GetSection("password");
+
+Используя options model вы можете в строго типизированной манере сделать настройки доступными во всем вашем приложении. Options - это просто Plain Old CLR Object (POCO) классы, имеющие набор свойств, используемые как настройки. Вы можете добавить options model в ваше приложение вызвав AddOptions extension-метод у IServiceCollection. Вызов AddOptions добавляет IOptions<TOption> сервис в сервис-контейнер, Этот сервис может быть использован для получения Options разных типов, везде где dependency injection доступно.
