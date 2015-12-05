@@ -149,6 +149,65 @@ Request delegate - это ключевая концепция ASP.NET 5. Request
 
 `public delegate Task RequestDelegate(HttpContext context);`
 
-ASP.NET 5 middleware принимают на вход следующий в request pipeline request delegate и предоставляет request delegate со своей логикой. Возвращаемый request delegate может вызывать или не вызывать следующий request delegate. В качестве упрощения запуска middleware не вызывающего следующий request delegate, вы можете использовать Run extension метод IApplicationBuilder.
+[ASP.NET 5 middleware](https://docs.asp.net/en/latest/fundamentals/middleware.html) принимают на вход следующий в request pipeline request delegate и предоставляет request delegate со своей логикой. Возвращаемый request delegate может вызывать или не вызывать следующий request delegate. В качестве упрощения создания middleware не вызывающего следующий request delegate, вы можете использовать Run extension метод IApplicationBuilder.
 
 `app.Run(async context => await context.Response.WriteAsync("Hello, world!"));`
+
+Того же самого можно достичь используя Use extension метод и не вызывая следующий request delegate:
+
+`app.Use(next => async context => await context.Response.WriteAsync("Hello, world!"));`
+
+Чтобы создать middleware, которое вы могли бы использовать в разных приложениях, вы можете написать его в виде класса. По-соглашению, следующий request delegate (а также необходимые сервисы и дополнительные параметры) передается в конструктор этого класса. request delegate этого middleware должен быть реализован в асинхронном Invoke методе, как это показано ниже:
+
+	using Microsoft.AspNet.Builder;
+	using Microsoft.AspNet.Http;
+	using System.Threading.Tasks;
+	public class XHttpHeaderOverrideMiddleware
+	{
+	  private readonly RequestDelegate _next;
+	  public XHttpHeaderOverrideMiddleware(RequestDelegate next)
+	  {
+	    _next = next;
+	  }
+	  public Task Invoke(HttpContext httpContext)
+	  {
+	    var headerValue =
+	      httpContext.Request.Headers["X-HTTP-Method-Override"];
+	    var queryValue =
+	      httpContext.Request.Query["X-HTTP-Method-Override"];
+	    if (!string.IsNullOrEmpty(headerValue))
+	    {
+	      httpContext.Request.Method = headerValue;
+	    }
+	    else if (!string.IsNullOrEmpty(queryValue))
+	    {
+	      httpContext.Request.Method = queryValue;
+	    }
+	    return _next.Invoke(httpContext);
+	  }
+	}
+
+В request pipeline вы можете включить middleware следующее этому соглашению с помощью extension метода у IApplicationBuilder: `UseMiddleware<T>`. Любые параметры переданные в этот метод, будут внедрены в конструктор middleware после next request delegate и запрошенных сервисов. По-соглашению, middleware должно быть определенно как "Use..." extension метод у IApplicationBuilder:
+
+	public static class BuilderExtensions
+	{
+	  public static IApplicationBuilder UseXHttpHeaderOverride(
+	    this IApplicationBuilder builder)
+	  {
+	    return builder.UseMiddleware<XHttpHeaderOverrideMiddleware>();
+	  }
+	}
+
+Чтобы включить это middleware в request pipeline, вам необходимо вызвать этот extension метод в Configure методе вашего веб-приложения:
+
+	public class Startup
+	{
+	  public void Configure(IApplicationBuilder app)
+	  {
+	    app.UseXHttpHeaderOverride();
+	  }
+	}
+
+ASP.NET 5 поставляется с большим набором встроенных middleware. Есть middleware для работы с [файлами](https://docs.asp.net/en/latest/fundamentals/static-files.html), [маршрутизации](https://docs.asp.net/en/latest/fundamentals/routing.html), обработки ошибок, [диагностики](https://docs.asp.net/en/latest/fundamentals/diagnostics.html) и безопасности. Middleware поставляются как NuGet пакеты через nuget.org.
+
+## Конфигурирование сервисов ##
