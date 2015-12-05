@@ -251,11 +251,11 @@ Microsoft.AspNet.Http.IHttpContextAccessor
 
 Добавляемые сервисы могут быть одними из трех типов: transient, scoped или singleton. Transient сервисы создаются при каждом их запросе из контейнера. Scoped сервисы создаются только если они еще не создавались в текущем scope. В веб-приложениях scope-контейнер создается для каждого запроса, поэтому можно думать о них как о сервисах создаваемых для каждого запроса. Singleton сервисы создаются только один раз за цикл жизни приложения.
 
-## Конфигурирование приложения ##
+## Конфигурация приложения ##
 
-Web.config и app.config файлы больше не поддерживаются. Вместо них ASP.NET 5 использует новое, упрощенное [Configuration API](https://docs.asp.net/en/latest/fundamentals/configuration.html). Новое Configuration API позволяет получать и устанавливает данные, используя разные источники. Используемый по-умолчанию configuration-провайдер поддерживает JSON, XML, INI, аргументы командной строки и environment variables, установку параметров прямо из кода (in-memory collection). Вы можете указать несколько источников и они будут использоваться в порядке их добавления (добавленные последними будут переопределять настройки добавленных ранее). Также вы [можете иметь разные настройки для каждой среды](https://docs.asp.net/en/latest/fundamentals/environments.html) (test, stage, prod), что облегчает публикацию приложения в разные среды.
+Web.config и app.config файлы больше не поддерживаются. Вместо них ASP.NET 5 использует новое, упрощенное [Configuration API](https://docs.asp.net/en/latest/fundamentals/configuration.html). Оно позволяет получать данные из разных источников. Используемые по-умолчанию configuration-провайдеры поддерживают JSON, XML, INI, аргументы командной строки и environment variables, а также установку параметров прямо из кода (in-memory collection). Вы можете указать несколько источников и они будут использоваться в порядке их добавления (добавленные последними будут переопределять настройки добавленных ранее). Также вы [можете иметь разные настройки для каждой среды](https://docs.asp.net/en/latest/fundamentals/environments.html) (test, stage, prod), что облегчает публикацию приложения в разные среды.
 
-Пример настройки Configuration API приведен ниже:
+Пример получения настроек приложения, используя Configuration API приведен ниже:
 
 	var builder = new ConfigurationBuilder()
 	            .AddJsonFile("appsettings.json")
@@ -269,4 +269,15 @@ Web.config и app.config файлы больше не поддерживаютс
 	var user = Configuration.GetSection("user");
 	var password = Configuration.GetSection("password");
 
-Используя options model вы можете в строго типизированной манере сделать настройки доступными во всем вашем приложении. Options - это просто Plain Old CLR Object (POCO) классы, имеющие набор свойств, используемые как настройки. Вы можете добавить options model в ваше приложение вызвав AddOptions extension-метод у IServiceCollection. Вызов AddOptions добавляет IOptions<TOption> сервис в сервис-контейнер, Этот сервис может быть использован для получения Options разных типов, везде где dependency injection доступно.
+Работать с Configuration API рекомендуется в Startup классе, а в дальнейшем настройки разделять на небольшие наборы данных, соответствующие какой-либо функциональности и передавать другим частям приложения с помощью механизма Options.
+
+[Options](https://docs.asp.net/en/latest/fundamentals/configuration.html#using-options-and-configuration-objects) позволяют использовать Plain Old CLR Object (POCO) классы в качестве объектов с настройками. Вы можете добавить механизм Options в ваше приложение вызвав AddOptions extension-метод у IServiceCollection в ConfigureServices методе. Фактически, вызов AddOptions добавляет `IOptions<TOption>` сервис в сервис-контейнер, Этот сервис может быть использован для получения Options разных типов, везде где dependency injection доступно (достаточно лишь запросить из системы dependency injection IOption<TOption>, где TOption POCO класс с настройками).
+
+Внутренне механизм Options работает через добавление `IConfigureOptions<TOptions>` в сервис-контейнер, где TOptions - класс с настройками. Стандартная реализация `IOptions<TOption>` будет собирать все `IConfigureOptions<TOptions>` одного типа и "суммировать их свойства", а затем предоставлять запросившему конечный экземпляр - это происходит потому что вы можете множество раз добавлять объект с настройками одного и того же типа в сервис-контейнер, переопределяя настройки.
+
+Для добавлении новой options вы можете использовать `Configure<TOption>` extension-метод у IServiceCollection:
+
+	services.Configure<MvcOptions>(options => options.Filters.Add(
+	  new MyGlobalFilter()));
+
+Вы также можете легко передать часть настроек из механизма Конфигурации приложения в
