@@ -5,6 +5,10 @@ categories: ASP-NET-5, DNX
 published: draft
 ---
 
+## Вступление от переводчика ##
+
+Данная статья является переводом статьи [ASP.NET 5 - A Deep Dive into the ASP.NET 5 Runtime](https://msdn.microsoft.com/en-us/magazine/dn913182.aspx) - великолепного введения в архитектуру ASP.NET 5 и DNX Runtime на котором работает новая версия ASP.NET. К сожалению, так как оригинальная статья была написана в марте 2015 года, во время когда, ASP.NET был еще в стадии активной разработки (примерно beta 3), многая информация в ней устарела, и дословный перевод не имел смысла. Поэтому вся информация была актуализирована до текущей версии ASP.NET 5 (Release Candidate 1). Также я добавил ссылки на связанные ресурсы и исходный код на GitHub.
+
 ## .NET Runtime Environment (DNX) ##
 
 ASP.NET базируется на гибком, кроссплатформенном Runtime, который может работать с разными .NET CLR (.NET Core, Mono, .NET Framework). Вы можете запустить ASP.NET 5 на полном .NET Framework или можете запустить на новом [.NET Core](https://docs.asp.net/en/latest/conceptual-overview/dotnetcore.html), который позволяет вам просто копировать его в существующее окружение, без изменения чего-либо еще на вашей машине. Используя .NET Core вы также можете запустить ASP.NET 5 кроссплатформенно на [Linux](https://docs.asp.net/en/latest/getting-started/installing-on-linux.html) и [Mac OS](https://docs.asp.net/en/latest/getting-started/installing-on-mac.html).
@@ -210,7 +214,7 @@ Request delegate - это ключевая концепция ASP.NET 5. Request
 
 ASP.NET 5 поставляется с большим набором встроенных middleware. Есть middleware для работы с [файлами](https://docs.asp.net/en/latest/fundamentals/static-files.html), [маршрутизации](https://docs.asp.net/en/latest/fundamentals/routing.html), обработки ошибок, [диагностики](https://docs.asp.net/en/latest/fundamentals/diagnostics.html) и безопасности. Middleware поставляются как NuGet пакеты через nuget.org.
 
-## Конфигурирование сервисов ##
+## Настройка сервисов приложения ##
 
 В конструктор Startup класса из слоя хостинга могут внедряться сервисы (для этого достаточно запросить их в качестве параметров).
 
@@ -218,28 +222,33 @@ ASP.NET 5 поставляется с большим набором встрое
 
 **Необходимо описать сервисы и дать информацию о доступе к ним со слоев ниже хостинга**
 
-Managed Entry Point
-Microsoft.Extensions.PlatformAbstractions.IApplicationEnvironment
-Microsoft.Extensions.PlatformAbstractions.IAssemblyLoaderContainer
-Microsoft.Extensions.PlatformAbstractions.IAssemblyLoadContextAccessor - абстракция для создания контекста загрузчика сборок.
-Microsoft.Extensions.PlatformAbstractions.IRuntimeEnvironment
+`Microsoft.Extensions.PlatformAbstractions.IApplicationEnvironment` - информация о приложении (физический путь до папки приложения, его имя, версия, конфигурация (Release, Debug), используемый Runtime фреймворк).
 
-ApplicationHost
-Microsoft.Dnx.Compilation.ILibraryExporter
+`Microsoft.Extensions.PlatformAbstractions.IAssemblyLoaderContainer` - сервис позволяет добавить свой загрузчик сборок.
 
-Microsoft.Extensions.PlatformAbstractions.IApplicationShutdown
-Microsoft.Extensions.PlatformAbstractions.ILibraryManager
+`Microsoft.Extensions.PlatformAbstractions.IAssemblyLoadContextAccessor` - абстракция для доступа к загрузчикам сборок.
 
-Hosting
-Microsoft.AspNet.Hosting.Startup.IStartupLoader
-Microsoft.AspNet.Hosting.IHostingEnvironment - доступ к Web-root вашего приложения, обычно папка "wwwroot".
-Microsoft.Extensions.Logging.ILoggerFactory
-Microsoft.AspNet.Hosting.Server.IServerLoader
-Microsoft.AspNet.Hosting.Builder.IApplicationBuilderFactory
-Microsoft.AspNet.Http.IHttpContextFactory
-Microsoft.AspNet.Http.IHttpContextAccessor
+`Microsoft.Extensions.PlatformAbstractions.IRuntimeEnvironment` - информация о DNX runtime и ОС.
 
-Вы настраиваете существующие сервисы и добавляете новые в ConfigureServices методе с помощью экземпляра IServiceCollection, принимаемого в качестве параметра. ASP.NET 5 приходит с простым встроенным [IoC-контейнером](https://docs.asp.net/en/latest/fundamentals/dependency-injection.html), но вы легко можете заменить его на любой другой контейнер.
+`Microsoft.Dnx.Compilation.ILibraryExporter`
+
+`Microsoft.Extensions.PlatformAbstractions.ILibraryManager` - доступ к используемым приложением библиотекам.
+
+`Microsoft.AspNet.Hosting.Startup.IStartupLoader` - сервис для поиска Startup файла.
+
+`Microsoft.AspNet.Hosting.IHostingEnvironment` - доступ к Web-root вашего приложения (обычно папка "wwwroot"), а также информация о текущей среде(dev, stage, prod).
+
+`Microsoft.Extensions.Logging.ILoggerFactory` - фабрика для создания [логгеров](https://docs.asp.net/en/latest/fundamentals/logging.html).
+
+`Microsoft.AspNet.Hosting.Server.IServerLoader` - загрузчик веб-сервера.
+
+`Microsoft.AspNet.Hosting.Builder.IApplicationBuilderFactory` - фабрика для создания IApplicationBuilder (используется для построения application pipeline).
+
+`Microsoft.AspNet.Http.IHttpContextFactory` - фабрика для создания Http-контекста.
+
+`Microsoft.AspNet.Http.IHttpContextAccessor` - предоставляет доступ к текущему Http-контексту.
+
+Вы настраиваете существующие сервисы и добавляете новые в ConfigureServices методе с помощью экземпляра IServiceCollection. ASP.NET 5 приходит с простым встроенным [IoC-контейнером](https://docs.asp.net/en/latest/fundamentals/dependency-injection.html), но вы легко можете заменить его на любой другой контейнер.
 
 Обычно фреймворки предоставляют Add extension метод для добавления их сервисов в IServiceCollection. Например, добавление сервисов используемых ASP.NET MVC 6 производится так:
 
@@ -250,6 +259,8 @@ Microsoft.AspNet.Http.IHttpContextAccessor
 	}
 
 Добавляемые сервисы могут быть одними из трех типов: transient, scoped или singleton. Transient сервисы создаются при каждом их запросе из контейнера. Scoped сервисы создаются только если они еще не создавались в текущем scope. В веб-приложениях scope-контейнер создается для каждого запроса, поэтому можно думать о них как о сервисах создаваемых для каждого запроса. Singleton сервисы создаются только один раз за цикл жизни приложения.
+
+>В консольном приложении, где доступ к dependency injection отсутствует, для доступа к сервисам: IApplicationEnvironment, IRuntimeEnvironment, IAssemblyLoaderContainer, IAssemblyLoadContextAccessor и ILibraryManager необходимо использовать статический объект `Microsoft.Extensions.PlatformAbstractions.PlatformServices.Default`. А для доступа к ILibraryExporter и ICompilerOptionsProvider статический объект `Microsoft.Extensions.CompilationAbstractions.CompilationServices.Default`.
 
 ## Конфигурация приложения ##
 
@@ -280,4 +291,39 @@ Web.config и app.config файлы больше не поддерживаютс
 	services.Configure<MvcOptions>(options => options.Filters.Add(
 	  new MyGlobalFilter()));
 
-Вы также можете легко передать часть настроек из механизма Конфигурации приложения в
+Вы также можете легко передать часть конфигурационных настроек в options:
+
+	services.Configure<MyOptions>(Configuration);
+
+В этом случае имена настроек из конфигурации будут мапиться на имена свойств класса настроек.
+
+## Веб-сервер ##
+
+Как только веб-сервер стартует он начинает ожидать входящие запросы и запускать процесс обработки (application pipeline) для каждого из них. Уровень веб-сервера, поднимает запрос на уровень хостинга, раскрывая ему набор feature интерфейсов. Есть feature интерфейсы для отправки файлов, веб-сокетов, поддержки сессий, клиентских сертификатов и многих других, вы можете увидеть полный список поддерживаемых feature интерфейсов [здесь](https://docs.asp.net/en/latest/fundamentals/request-features.html).
+
+Например feature интерфейс для Http request:
+
+	namespace Microsoft.AspNet.Http.Features
+	{
+	    public interface IHttpRequestFeature
+	    {
+	        string Protocol { get; set; }
+	        string Scheme { get; set; }
+	        string Method { get; set; }
+	        string PathBase { get; set; }
+	        string Path { get; set; }
+	        string QueryString { get; set; }
+	        IHeaderDictionary Headers { get; set; }
+	        Stream Body { get; set; }
+	    }
+	}
+
+Веб-сервер использует feature интерфейсы для раскрытия низкоуровневой функциональности уровню хостинга. А он в свою очередь делает доступными их всему приложению, через `HttpContext.Features` коллекцию. Это позволяет разорвать связи между уровнем веб-сервера и хостинга и размешать приложение на различных веб-серверах. ASP.NET 5 поставляется с встроенной поддержкой IIS, оберткой над HTTP.SYS ([Microsoft.AspNet.Server.Web­Listener](https://www.nuget.org/packages/Microsoft.AspNet.Server.WebListener)) и новым кроссплатформенным веб-сервером под названием [Kestrel](https://github.com/aspnet/KestrelHttpServer).
+
+Open Web Interface for .NET (OWIN) стандарт разделяющий эти же цели. OWIN стандартизирует как .NET сервера и приложения должны общаться друг с другом. ASP.NET 5 [поддерживает OWIN](https://docs.asp.net/en/latest/fundamentals/owin.html) с помощью [Microsoft.AspNet.Owin](https://github.com/aspnet/HttpAbstractions/tree/1.0.0-rc1/src/Microsoft.AspNet.Owin) пакета. Вы [можете хостить](https://github.com/aspnet/Entropy/tree/dev/samples/Owin.Nowin.HelloWorld) ASP.NET 5 приложения на OWIN-based веб-серверах и вы можете [использовать OWIN middleware](https://github.com/aspnet/Entropy/tree/dev/samples/Owin.HelloWorld) в ASP.NET 5 pipeline.
+
+[Katana Project](http://katanaproject.codeplex.com) была первой попыткой Microsoft реализовать поддержку OWIN на стеке ASP.NET и многие идеи и концепты были перенесены из нее в ASP.NET 5. Katana имеет похожую модель построения pipeline из middleware и хостинга на различных веб-серверах. Однако, в отличие от Katana, которая раскрывает ниже лежащий уровень OWIN, ASP.NET 5 переходит к более удобным абстракциям. Но вы до сих пор можете использовать Katana middleware в ASP.NET 5 с помощью [OWIN моста](https://github.com/aspnet/Entropy/tree/dev/samples/Owin.IAppBuilderBridge)
+
+## Итоги ##
+
+ASP.NET 5 runtime построен с нуля для поддержки кроссплатформенных веб-приложений. ASP.NET 5 имеет гибкую, многослойную архитектуру, которая может запускаться на полном .NET Framework, .NET Core и даже на Mono. Новая хостинг модель позволяет легко компоновать приложения, используя middleware, хостить их на различных веб-серверах, а также поддерживает dependency injection и новые улучшенные возможности по конфигурированию приложений.
