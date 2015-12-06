@@ -7,11 +7,17 @@ published: draft
 
 ## Вступление от переводчика ##
 
-Данная статья является переводом статьи [ASP.NET 5 - A Deep Dive into the ASP.NET 5 Runtime](https://msdn.microsoft.com/en-us/magazine/dn913182.aspx) - великолепного введения в архитектуру ASP.NET 5 и DNX Runtime на котором работает новая версия ASP.NET. К сожалению, так как оригинальная статья была написана в марте 2015 года, во время когда, ASP.NET был еще в стадии активной разработки (примерно beta 3), многая информация в ней устарела, и дословный перевод не имел смысла. Поэтому вся информация была актуализирована до текущей версии ASP.NET 5 (Release Candidate 1). Также я добавил ссылки на связанные ресурсы и исходный код на GitHub.
+Данная статья является переводом статьи [ASP.NET 5 - A Deep Dive into the ASP.NET 5 Runtime](https://msdn.microsoft.com/en-us/magazine/dn913182.aspx) - великолепного введения в архитектуру ASP.NET 5 и DNX Runtime на котором работает новая версия ASP.NET. К сожалению, так как оригинальная статья была написана в марте 2015 года, во время когда ASP.NET был еще в стадии активной разработки (примерно beta 3), многое в ней устарело. Поэтому вся информация была актуализирована до текущей версии ASP.NET 5 (Release Candidate 1), также я добавил ссылки на связанные ресурсы и исходный код на GitHub.
+
+Я считаю, что эта статья важна для всех ASP.NET разработчиков так как дает понимание того, как работает новая версия ASP.NET и позволяет перестать работать с ним как с черным ящиком. Приятного погружения!
+
+![Архитектура ASP.NET 5 и DNX](/images/asp-net-5/runtime/dnxDiagram2.jpg)
 
 ## .NET Runtime Environment (DNX) ##
 
 ASP.NET базируется на гибком, кроссплатформенном Runtime, который может работать с разными .NET CLR (.NET Core, Mono, .NET Framework). Вы можете запустить ASP.NET 5 на полном .NET Framework или можете запустить на новом [.NET Core](https://docs.asp.net/en/latest/conceptual-overview/dotnetcore.html), который позволяет вам просто копировать его в существующее окружение, без изменения чего-либо еще на вашей машине. Используя .NET Core вы также можете запустить ASP.NET 5 кроссплатформенно на [Linux](https://docs.asp.net/en/latest/getting-started/installing-on-linux.html) и [Mac OS](https://docs.asp.net/en/latest/getting-started/installing-on-mac.html).
+
+<!--excerpt-->
 
 Инфраструктура позволяющая запускать и исполнять приложения ASP.NET 5 называется [.NET Runtime Environment или DNX](https://docs.asp.net/en/latest/dnx/overview.html). DNX предоставляет все что необходимо для разработки приложений на .NET: host process, CLR hosting логику, обнаружение управляемой Entry Point и т.д.
 
