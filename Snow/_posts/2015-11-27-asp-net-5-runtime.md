@@ -11,10 +11,6 @@ published: draft
 
 Я считаю, что эта статья важна для всех ASP.NET разработчиков собирающихся переходить на новый стек, так как дает понимание того, как работает новая версия ASP.NET и позволяет перестать работать с ней как с черным ящиком. Приятного погружения!
 
-![Архитектура ASP.NET 5 и DNX](/images/asp-net-5/runtime/dnxDiagram2.jpg)
-
-Изображение взято из статьи [DNX-structure](https://github.com/aspnet/Home/wiki/DNX-structure)
-
 ## .NET Runtime Environment (DNX) ##
 
 ASP.NET базируется на гибком, кроссплатформенном Runtime, который может работать с разными .NET CLR (.NET Core, Mono, .NET Framework). Вы можете запустить ASP.NET 5 на полном .NET Framework или можете запустить на новом [.NET Core](https://docs.asp.net/en/latest/conceptual-overview/dotnetcore.html), который позволяет вам просто копировать его в существующее окружение, без изменения чего-либо еще на вашей машине. Используя .NET Core вы также можете запустить ASP.NET 5 кроссплатформенно на [Linux](https://docs.asp.net/en/latest/getting-started/installing-on-linux.html) и [Mac OS](https://docs.asp.net/en/latest/getting-started/installing-on-mac.html).
@@ -26,6 +22,10 @@ ASP.NET базируется на гибком, кроссплатформенн
 DNX базируется на том же самом .NET CLR и базовой библиотеке классов, что знают и любят существующие .NET разработчики, и в то же время он разработан с возможностью запускать приложения (на данный момент веб и консольные приложения) под операционными системами отличными от Windows.
 
 Логически DNX имеет пять слоев функциональности. Я опишу каждый из этих слоев вместе с их обязанностями.
+
+![Архитектура ASP.NET 5 и DNX](/images/asp-net-5/runtime/dnxDiagram2.jpg)
+
+Изображение взято из статьи [DNX-structure](https://github.com/aspnet/Home/wiki/DNX-structure)
 
 ## Слой первый: Нативный процесс  ## 
 
@@ -62,7 +62,7 @@ DNX базируется на том же самом .NET CLR и базовой 
 
 ## Кроссплатформенныe SDK Tools ##
 
-dnx поставляется вместе c SDK, который содержит все необходимое для построения кросс-платформенных .NET приложений.
+DNX поставляется вместе c SDK, который содержит все необходимое для построения кросс-платформенных .NET приложений.
 
 [**DNVM** - DNX Version Manager](https://github.com/aspnet/Home/wiki/Version-Manager). Позволяет просмотреть установленные на компьютере DNX, установить новые и выбрать тот, который вы будете использовать. Прочитать про установку DNVM можно [здесь](https://docs.asp.net/en/latest/getting-started/index.html).
 
