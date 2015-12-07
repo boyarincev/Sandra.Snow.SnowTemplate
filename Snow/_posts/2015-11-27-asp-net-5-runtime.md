@@ -138,6 +138,8 @@ DNX ApplicationHost вызывает [entry point метод](https://github.com
 
 ## Startup ##
 
+**Раскрыть термины request pipeline и middleware**
+
 Слой хостинга также [ответственен за запуск стартовой логики](https://github.com/aspnet/Hosting/blob/1.0.0-rc1/src/Microsoft.AspNet.Hosting/WebApplication.cs#L56) вашего приложения. Обычно она находится в Startup классе с Configure методом для настройки request pipeline и ConfigureServices методом для настройки используемых приложением сервисов.
 
 	namespace WebApplication1
