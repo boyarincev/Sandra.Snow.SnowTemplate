@@ -228,8 +228,6 @@ ASP.NET 5 поставляется с большим набором встрое
 
 По-умолчанию вам доступны следующие сервисы:
 
-**Необходимо описать сервисы и дать информацию о доступе к ним со слоев ниже хостинга**
-
 `Microsoft.Extensions.PlatformAbstractions.IApplicationEnvironment` - информация о приложении (физический путь до папки приложения, его имя, версия, конфигурация (Release, Debug), используемый Runtime фреймворк).
 
 `Microsoft.Extensions.PlatformAbstractions.IAssemblyLoaderContainer` - сервис позволяет добавить свой загрузчик сборок.
