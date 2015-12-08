@@ -179,9 +179,13 @@ Request delegate - это ключевая концепция ASP.NET 5. Request
 
 `app.Use(next => async context => await context.Response.WriteAsync("Hello, world!"));`
 
+И пример с вызовом следующего в цепочке request delegate:
+
+`app.Use(next => async context => await context.Response.WriteAsync("Hello, world!"));`
+
 Для того, чтобы request delegate было удобно переиспользовать, можно оформить его в виде [ASP.NET 5 middleware](https://docs.asp.net/en/latest/fundamentals/middleware.html).
 
-Чтобы создать middleware, нужно написать его в виде класса. По-соглашению, следующий в цепочке request delegate (а также необходимые сервисы и дополнительные параметры) передается в конструктор middleware. Логика обработки HttpContext должна быть реализована в асинхронном Invoke методе, как это показано ниже:
+Middleware ASP.NET 5 - это обычный класс, следующий определенному соглашению. Следующий в цепочке request delegate (а также необходимые сервисы и дополнительные параметры) передается в конструктор middleware. Логика обработки HttpContext должна быть реализована в асинхронном Invoke методе, как это показано ниже:
 
 	using Microsoft.AspNet.Builder;
 	using Microsoft.AspNet.Http;
@@ -211,7 +215,7 @@ Request delegate - это ключевая концепция ASP.NET 5. Request
 	  }
 	}
 
-Вызов следующего (если вы хотите вызвать следующий) в цепочке request delegate должен осуществляться внутри Invoke метода. Если вы разместите какую-нибудь логику ниже вызова следующего request delegate, то она будет выполнена после того, как все следующие за вашим обработчики отработают.
+Вызов следующего (если вы хотите вызвать следующий) в цепочке request delegate должен осуществляться внутри Invoke метода. Если вы разместите какую-нибудь логику ниже вызова следующего request delegate, то она будет выполнена после того, как все следующие за вашим обработчики входящего запроса отработают.
 
 В request pipeline вы можете включить middleware следующее этому соглашению с помощью `UseMiddleware<T>` extension метода у IApplicationBuilder:
 
@@ -223,7 +227,7 @@ Request delegate - это ключевая концепция ASP.NET 5. Request
 Любые параметры переданные в этот метод, будут внедрены в конструктор middleware после `RequestDelegate next` и запрошенных сервисов (о сервисах поговорим ниже):
 
 	//конструктор middleware  
-    public XHttpHeaderOverrideMiddleware(RequestDelegate next, SomeServise service1, 
+    public XHttpHeaderOverrideMiddleware(RequestDelegate next, SomeServise1 service1, 
 		SomeServise2 service2, string param1, bool param2)
     {
       _next = next;
@@ -232,7 +236,7 @@ Request delegate - это ключевая концепция ASP.NET 5. Request
 	//включение в request pipeline
     public void Configure(IApplicationBuilder app)
     {
-      app.UseMiddleware<XHttpHeaderOverrideMiddleware>(service1, service2, param1, param2);
+      app.UseMiddleware<XHttpHeaderOverrideMiddleware>(param1, param2);
     }
 
 По-соглашению, включение middleware в цепочку вызовов следует оформить в виде "Use..." extension метода у IApplicationBuilder:
@@ -246,7 +250,7 @@ Request delegate - это ключевая концепция ASP.NET 5. Request
 	  }
 	}
 
-Чтобы включить это middleware в request pipeline, вам необходимо вызвать этот extension метод в Configure методе вашего веб-приложения:
+Чтобы включить это middleware в request pipeline, вам необходимо вызвать этот extension метод в Configure методе класса Startup:
 
 	public class Startup
 	{
@@ -258,9 +262,11 @@ Request delegate - это ключевая концепция ASP.NET 5. Request
 
 ASP.NET 5 поставляется с большим набором встроенных middleware. Есть middleware для работы с [файлами](https://docs.asp.net/en/latest/fundamentals/static-files.html), [маршрутизации](https://docs.asp.net/en/latest/fundamentals/routing.html), обработки ошибок, [диагностики](https://docs.asp.net/en/latest/fundamentals/diagnostics.html) и безопасности. Middleware поставляются как NuGet пакеты через nuget.org.
 
-## Использование сервисов ##
+## Сервисы ##
 
-В конструктор Startup класса из слоя хостинга могут внедряться сервисы (для этого достаточно запросить их в качестве параметров).
+В ASP.NET 5 вводится понятие Сервисов - "общих" компонентов, доступ к которым может требоваться в нескольких местах приложения. Сервисы доступны приложению через систему dependency injection. ASP.NET 5 поставляется с простым [IoC-контейнером](https://docs.asp.net/en/latest/fundamentals/dependency-injection.html), поддерживающим внедрение зависимостей в конструктор, но вы легко можете [заменить](https://docs.asp.net/en/latest/fundamentals/dependency-injection.html#replacing-the-default-services-container) его на любой другой контейнер.
+
+Startup класс также поддерживает внедрение зависимостей, для этого достаточно запросить их в качестве параметров конструктора.
 
 По умолчанию вам доступны следующие сервисы:
 
@@ -272,13 +278,13 @@ ASP.NET 5 поставляется с большим набором встрое
 
 `Microsoft.Extensions.Logging.ILoggerFactory` - фабрика для создания [логгеров](https://docs.asp.net/en/latest/fundamentals/logging.html).
 
-`Microsoft.AspNet.Hosting.Builder.IApplicationBuilderFactory` - фабрика для создания IApplicationBuilder (используется для построения application pipeline).
+`Microsoft.AspNet.Hosting.Builder.IApplicationBuilderFactory` - фабрика для создания IApplicationBuilder (используется для построения request pipeline).
 
 `Microsoft.AspNet.Http.IHttpContextFactory` - фабрика для создания Http-контекста.
 
 `Microsoft.AspNet.Http.IHttpContextAccessor` - предоставляет доступ к текущему Http-контексту.
 
-Вы настраиваете существующие сервисы и добавляете новые в ConfigureServices методе класса Startup с помощью интерфейса IServiceCollection. ASP.NET 5 приходит с простым встроенным [IoC-контейнером](https://docs.asp.net/en/latest/fundamentals/dependency-injection.html), но вы легко можете заменить его на любой другой контейнер.
+Вы настраиваете существующие сервисы и добавляете новые в ConfigureServices методе класса Startup с помощью интерфейса IServiceCollection.
 
 Обычно фреймворки и библиотеки предоставляют "Add..." extension метод у IServiceCollection для добавления их сервисов в IoC-контейнер. Например, добавление сервисов используемых ASP.NET MVC 6 производится так:
 
@@ -288,13 +294,13 @@ ASP.NET 5 поставляется с большим набором встрое
 	  services.AddMvc();
 	}
 
-Добавляемые сервисы могут быть одними из трех типов: transient, scoped или singleton. Transient сервисы создаются при каждом их запросе из контейнера. Scoped сервисы создаются только если они еще не создавались в текущем scope. В веб-приложениях scope-контейнер создается для каждого запроса, поэтому можно думать о них как о сервисах создаваемых для каждого http запроса. Singleton сервисы создаются только один раз за цикл жизни приложения.
+Вы можете добавлять собственные сервисы в IoC-контейнер. Добавляемые сервисы могут быть одними из трех типов: transient (AddTransient метод), scoped (AddScoped метод) или singleton (AddSingleton метод). Transient сервисы создаются при каждом их запросе из контейнера. Scoped сервисы создаются только если они еще не создавались в текущем scope. В веб-приложениях scope-контейнер создается для каждого запроса, поэтому можно думать о них как о сервисах создаваемых для каждого http запроса. Singleton сервисы создаются только один раз за цикл жизни приложения.
 
 >В консольном приложении, где доступ к dependency injection отсутствует, для доступа к сервисам: IApplicationEnvironment и IRuntimeEnvironment необходимо использовать статический объект `Microsoft.Extensions.PlatformAbstractions.PlatformServices.Default`.
 
 ## Конфигурация приложения ##
 
-Web.config и app.config файлы больше не поддерживаются. Вместо них ASP.NET 5 использует новое, упрощенное [Configuration API](https://docs.asp.net/en/latest/fundamentals/configuration.html). Оно позволяет получать данные из разных источников. Используемые по-умолчанию configuration-провайдеры поддерживают JSON, XML, INI, аргументы командной строки и environment variables, а также установку параметров прямо из кода (in-memory collection). Вы можете указать несколько источников и они будут использоваться в порядке их добавления (добавленные последними будут переопределять настройки добавленных ранее). Также вы [можете иметь разные настройки для каждой среды](https://docs.asp.net/en/latest/fundamentals/environments.html) (test, stage, prod), что облегчает публикацию приложения в разные среды.
+Web.config и app.config файлы больше не поддерживаются. Вместо них ASP.NET 5 использует новое, упрощенное [Configuration API](https://docs.asp.net/en/latest/fundamentals/configuration.html). Оно позволяет получать данные из разных источников. Используемые по-умолчанию configuration-провайдеры поддерживают JSON, XML, INI, аргументы командной строки, environment variables, а также установку параметров прямо из кода (in-memory collection). Вы можете указать несколько источников и они будут использоваться в порядке их добавления (добавленные последними будут переопределять настройки добавленных ранее). Также вы [можете иметь разные настройки для каждой среды](https://docs.asp.net/en/latest/fundamentals/environments.html) (test, stage, prod), что облегчает публикацию приложения в разные среды.
 
 Пример получения настроек приложения, используя Configuration API приведен ниже:
 
@@ -310,16 +316,20 @@ Web.config и app.config файлы больше не поддерживаютс
 	var user = Configuration.GetSection("user");
 	var password = Configuration.GetSection("password");
 
-Работать с Configuration API рекомендуется в Startup классе, а в дальнейшем настройки разделять на небольшие наборы данных, соответствующие какой-либо функциональности и передавать другим частям приложения с помощью механизма Options.
+Работать с Configuration API рекомендуется в Startup классе, а в дальнейшем разделять настройки на небольшие наборы данных, соответствующие какой-либо функциональности и передавать другим частям приложения с помощью механизма Options.
 
-[Options](https://docs.asp.net/en/latest/fundamentals/configuration.html#using-options-and-configuration-objects) позволяют использовать Plain Old CLR Object (POCO) классы в качестве объектов с настройками. Вы можете добавить механизм Options в ваше приложение вызвав AddOptions extension-метод у IServiceCollection в ConfigureServices методе. Фактически, вызов AddOptions добавляет `IOptions<TOption>` сервис в сервис-контейнер, Этот сервис может быть использован для получения Options разных типов, везде где dependency injection доступно (достаточно лишь запросить из системы dependency injection IOption<TOption>, где TOption POCO класс с настройками).
+[Options](https://docs.asp.net/en/latest/fundamentals/configuration.html#using-options-and-configuration-objects) позволяют использовать Plain Old CLR Object (POCO) классы в качестве объектов с настройками. Вы можете добавить механизм Options в ваше приложение вызвав AddOptions extension-метод у IServiceCollection в ConfigureServices методе. Фактически, вызов AddOptions добавляет `IOptions<TOption>` сервис в сервис-контейнер, Этот сервис может быть использован для получения Options разных типов, везде где dependency injection доступно (достаточно лишь запросить из системы dependency injection `IOption<TOption>`, где TOption POCO класс с настройками).
 
 Внутренне механизм Options работает через добавление `IConfigureOptions<TOptions>` в сервис-контейнер, где TOptions - класс с настройками. Стандартная реализация `IOptions<TOption>` будет собирать все `IConfigureOptions<TOptions>` одного типа и "суммировать их свойства", а затем предоставлять запросившему конечный экземпляр - это происходит потому что вы можете множество раз добавлять объект с настройками одного и того же типа в сервис-контейнер, переопределяя настройки.
 
 Для добавлении новой options вы можете использовать `Configure<TOption>` extension-метод у IServiceCollection:
 
-	services.Configure<MvcOptions>(options => options.Filters.Add(
-	  new MyGlobalFilter()));
+
+	public void ConfigureServices(IServiceCollection services)
+	{
+		services.Configure<MvcOptions>(options => options.Filters.Add(
+		  new MyGlobalFilter()));
+	}
 
 Вы также можете легко передать часть конфигурационных настроек в options:
 
@@ -329,7 +339,7 @@ Web.config и app.config файлы больше не поддерживаютс
 
 ## Веб-сервер ##
 
-Как только веб-сервер стартует он начинает ожидать входящие запросы и запускать процесс обработки (application pipeline) для каждого из них. Уровень веб-сервера, поднимает запрос на уровень хостинга, раскрывая ему набор feature интерфейсов. Есть feature интерфейсы для отправки файлов, веб-сокетов, поддержки сессий, клиентских сертификатов и многих других, вы можете увидеть полный список поддерживаемых feature интерфейсов [здесь](https://docs.asp.net/en/latest/fundamentals/request-features.html).
+Как только веб-сервер стартует он начинает ожидать входящие запросы и запускать процесс обработки	 для каждого из них. Уровень веб-сервера, поднимает запрос на уровень хостинга, отправляя ему набор feature интерфейсов. Есть feature интерфейсы для отправки файлов, веб-сокетов, поддержки сессий, клиентских сертификатов и многих других, вы можете увидеть полный список поддерживаемых feature интерфейсов [здесь](https://docs.asp.net/en/latest/fundamentals/request-features.html).
 
 Например feature интерфейс для Http request:
 
@@ -348,16 +358,18 @@ Web.config и app.config файлы больше не поддерживаютс
 	    }
 	}
 
-Веб-сервер использует feature интерфейсы для раскрытия низкоуровневой функциональности уровню хостинга. А он в свою очередь делает доступными их всему приложению, через `HttpContext.Features` коллекцию. Это позволяет разорвать связи между уровнем веб-сервера и хостинга и размешать приложение на различных веб-серверах. ASP.NET 5 поставляется с встроенной поддержкой IIS, оберткой над HTTP.SYS ([Microsoft.AspNet.Server.Web­Listener](https://www.nuget.org/packages/Microsoft.AspNet.Server.WebListener)) и новым кроссплатформенным веб-сервером под названием [Kestrel](https://github.com/aspnet/KestrelHttpServer).
+Веб-сервер использует feature интерфейсы для раскрытия низкоуровневой функциональности уровню хостинга. А он в свою очередь делает доступными их всему приложению, через `HttpContext`. Это позволяет разорвать тесные связи между уровнем веб-сервера и хостинга и размешать приложение на различных веб-серверах. ASP.NET 5 поставляется с встроенной поддержкой IIS, оберткой над HTTP.SYS ([Microsoft.AspNet.Server.Web­Listener](https://www.nuget.org/packages/Microsoft.AspNet.Server.WebListener)) и новым кроссплатформенным веб-сервером под названием [Kestrel](https://github.com/aspnet/KestrelHttpServer).
 
 Open Web Interface for .NET (OWIN) стандарт разделяющий эти же цели. OWIN стандартизирует как .NET сервера и приложения должны общаться друг с другом. ASP.NET 5 [поддерживает OWIN](https://docs.asp.net/en/latest/fundamentals/owin.html) с помощью [Microsoft.AspNet.Owin](https://github.com/aspnet/HttpAbstractions/tree/1.0.0-rc1/src/Microsoft.AspNet.Owin) пакета. Вы [можете хостить](https://github.com/aspnet/Entropy/tree/dev/samples/Owin.Nowin.HelloWorld) ASP.NET 5 приложения на OWIN-based веб-серверах и вы можете [использовать OWIN middleware](https://github.com/aspnet/Entropy/tree/dev/samples/Owin.HelloWorld) в ASP.NET 5 pipeline.
 
-[Katana Project](http://katanaproject.codeplex.com) была первой попыткой Microsoft реализовать поддержку OWIN на стеке ASP.NET и многие идеи и концепты были перенесены из нее в ASP.NET 5. Katana имеет похожую модель построения pipeline из middleware и хостинга на различных веб-серверах. Однако, в отличие от Katana, которая раскрывает ниже лежащий уровень OWIN, ASP.NET 5 переходит к более удобным абстракциям. Но вы до сих пор можете использовать Katana middleware в ASP.NET 5 с помощью [OWIN моста](https://github.com/aspnet/Entropy/tree/dev/samples/Owin.IAppBuilderBridge)
+[Katana Project](http://katanaproject.codeplex.com) была первой попыткой Microsoft реализовать поддержку OWIN на стеке ASP.NET и многие идеи и концепты были перенесены из нее в ASP.NET 5. Katana имеет похожую модель построения pipeline из middleware и хостинга на различных веб-серверах. Однако, в отличие от Katana, которая открывает ниже лежащий уровень OWIN приложению, ASP.NET 5 переходит к более удобным абстракциям. Но вы до сих пор можете использовать Katana middleware в ASP.NET 5 с помощью [OWIN моста](https://github.com/aspnet/Entropy/tree/dev/samples/Owin.IAppBuilderBridge)
 
 ## Итоги ##
 
 ASP.NET 5 runtime построен с нуля для поддержки кроссплатформенных веб-приложений. ASP.NET 5 имеет гибкую, многослойную архитектуру, которая может запускаться на полном .NET Framework, .NET Core и даже на Mono. Новая хостинг модель позволяет легко компоновать приложения, используя middleware, хостить их на различных веб-серверах, а также поддерживает dependency injection и новые улучшенные возможности по конфигурированию приложений.
 
-## Список ссылок ##
+## Cсылки ##
 
-[docs.asp.net](https://docs.asp.net/en/latest/index.html) - содержит, практически, всю информацию из этой статьи (и не только ее).
+[docs.asp.net](https://docs.asp.net/en/latest/index.html) - документация ASP.NET 5.
+
+[github.com/aspnet/Home/wiki](https://github.com/aspnet/Home/wiki) - статьи про DNX Runtime.
