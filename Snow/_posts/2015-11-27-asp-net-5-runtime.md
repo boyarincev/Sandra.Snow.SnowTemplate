@@ -29,7 +29,7 @@ DNX базируется на том же самом .NET CLR и базовой 
 
 Нативный процесс - это очень тонкий слой с обязанностью найти и вызвать нативный CLR host, передав в него аргументы переданные в сам процесс. В Windows - это dnx.exe (находится в %YOUR_PROFILE%/.dnx/runtimes/%CHOOSEN_RUNTIME%); В Mac и Linux - это запускаемый bash script (тоже с именем dnx). [Запуск на IIS](https://docs.asp.net/en/latest/publishing/iis.html) происходит с помощью устанавливаемого на IIS нативного HTTP-модуля: [HTTPPlatformHandler](https://azure.microsoft.com/en-us/blog/announcing-the-release-of-the-httpplatformhandler-module-for-iis-8/) (который в итоге тоже запустит dnx.exe). Использование HTTPPlatformHandler позволяет запускать веб-приложение без любых зависимостей от .NET Framework (естественно, при запуске веб-приложений нацеленных на .NET Core, а не на полный .NET Framework).
 
-## Слой второй и третий: Нативный CLR host и CLR ##
+## Слой второй и третий: Нативные CLR host и CLR ##
 
 Имеют три главных обязанности:
 
@@ -37,11 +37,11 @@ DNX базируется на том же самом .NET CLR и базовой 
 2. Вызвать управляемую entry point, которая является следующим слоем.
 3. Когда точка входа нативного хоста возвращает управление этот процесс будет "убирать за собой" и выключать CLR - выгружать домен приложений и останавливать runtime.
 
-## Слой четвертый: Управляемая entry point ##
+## Слой четвертый: Точка входа в управляемый код ##
 
-> Примечание: В целом логика этого слоя находится в [Microsoft.DNX.Host](https://github.com/aspnet/dnx/tree/1.0.0-rc1-final/src/Microsoft.Dnx.Host). Entry Point этого слоя можно считать [RuntimeBootstrapper](https://github.com/aspnet/dnx/blob/1.0.0-rc1-final/src/Microsoft.Dnx.Host/RuntimeBootstrapper.cs).
+> Примечание:  В целом логика этого слоя находится в [Microsoft.DNX.Host](https://github.com/aspnet/dnx/tree/1.0.0-rc1-final/src/Microsoft.Dnx.Host). Entry Point этого слоя можно считать [RuntimeBootstrapper](https://github.com/aspnet/dnx/blob/1.0.0-rc1-final/src/Microsoft.Dnx.Host/RuntimeBootstrapper.cs).
 
-Этот первый слой из перечисленных написанный на managed code. Он ответственен за:
+Этот первый слой в котором выполнение DNX приложения переходит к выполнению управляемого кода. Он ответственен за:
 
 1. [Создание LoaderContainer](https://github.com/aspnet/dnx/blob/1.0.0-rc1-final/src/Microsoft.Dnx.Host/Bootstrapper.cs#L29), который будет содержать необходимые ILoader'ы. ILoader'ы ответственны за загрузку сборки. Когда CLR будет просить LoaderContainer предоставить какую-либо сборку, он будет делать это используя его ILoader'ы.
 2. [Создание корневого ILoader'а](https://github.com/aspnet/dnx/blob/1.0.0-rc1-final/src/Microsoft.Dnx.Host/Bootstrapper.cs#L32), который будет загружать требуемые сборки (из папки bin выбранного dnx runtime: %YOUR_PROFILE%/.dnx/runtimes/%CHOOSEN_RUNTIME%/bin/ и предоставленных во время запуска нативного процесса дополнительных путей, с помощью параметра `--lib`).
