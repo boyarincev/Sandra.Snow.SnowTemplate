@@ -7,9 +7,7 @@ published: draft
 
 ## Вступление от переводчика ##
 
-Данная статья является переводом статьи [ASP.NET 5 - A Deep Dive into the ASP.NET 5 Runtime](https://msdn.microsoft.com/en-us/magazine/dn913182.aspx) - великолепного введения в архитектуру DNX Runtime и построенного на нем ASP.NET 5. К сожалению, так как оригинальная статья была написана в марте 2015 года, во время когда ASP.NET 5 был еще в стадии активной разработки (примерно beta 3), многое в ней устарело. Поэтому при переводе вся информация была актуализирована до текущей версии ASP.NET 5 (RC1), также были добавлены ссылки на связанные ресурсы и исходный код на GitHub (так как исходный код самая лучшая документация).
-
-Я считаю, что эта статья важна для всех ASP.NET разработчиков собирающихся переходить на новый стек, так как дает понимание того, как работает новая версия ASP.NET и позволяет перестать работать с ней как с черным ящиком. Приятного погружения!
+Данная статья является переводом [ASP.NET 5 - A Deep Dive into the ASP.NET 5 Runtime](https://msdn.microsoft.com/en-us/magazine/dn913182.aspx) - введения в архитектуру DNX Runtime и построенного на нем ASP.NET 5. К сожалению, так как оригинальная статья была написана в марте 2015 года, во время когда ASP.NET 5 был еще в стадии активной разработки (примерно beta 3), многое в ней устарело. Поэтому при переводе вся информация была актуализирована до текущей версии ASP.NET 5 (RC1), также были добавлены ссылки на связанные ресурсы и исходный код на GitHub (так как исходный код самая лучшая документация). Приятного погружения!
 
 ## .NET Runtime Environment (DNX) ##
 
@@ -29,7 +27,7 @@ DNX базируется на том же самом .NET CLR и базовой 
 
 ## Слой первый: Нативный процесс  ## 
 
-Нативный процесс - это очень тонкий слой с обязанностью найти и вызвать нативный CLR host, передав в него аргументы переданные в сам процесс. В Windows - это dnx.exe (находится в %YOUR_PROFILE%/.dnx/runtimes/%CHOOSEN_RUNTIME%); В Mac и Linux - это запускаемый bash script. [Запуск на IIS](https://docs.asp.net/en/latest/publishing/iis.html) происходит с помощью устанавливаемого на IIS нативного HTTP-модуля: [HTTPPlatformHandler](https://azure.microsoft.com/en-us/blog/announcing-the-release-of-the-httpplatformhandler-module-for-iis-8/). Использование HTTPPlatformHandler позволяет запускать веб-приложение без любых зависимостей от .NET Framework (естественно при запуске веб-приложений нацеленных на .NET Core, а не на полный .NET Framework).
+Нативный процесс - это очень тонкий слой с обязанностью найти и вызвать нативный CLR host, передав в него аргументы переданные в сам процесс. В Windows - это dnx.exe (находится в %YOUR_PROFILE%/.dnx/runtimes/%CHOOSEN_RUNTIME%); В Mac и Linux - это запускаемый bash script (тоже с именем dnx). [Запуск на IIS](https://docs.asp.net/en/latest/publishing/iis.html) происходит с помощью устанавливаемого на IIS нативного HTTP-модуля: [HTTPPlatformHandler](https://azure.microsoft.com/en-us/blog/announcing-the-release-of-the-httpplatformhandler-module-for-iis-8/) (который в итоге тоже запустит dnx.exe). Использование HTTPPlatformHandler позволяет запускать веб-приложение без любых зависимостей от .NET Framework (естественно, при запуске веб-приложений нацеленных на .NET Core, а не на полный .NET Framework).
 
 ## Слой второй и третий: Нативный CLR host и CLR ##
 
@@ -43,7 +41,7 @@ DNX базируется на том же самом .NET CLR и базовой 
 
 > Примечание: В целом логика этого слоя находится в [Microsoft.DNX.Host](https://github.com/aspnet/dnx/tree/1.0.0-rc1-final/src/Microsoft.Dnx.Host). Entry Point этого слоя можно считать [RuntimeBootstrapper](https://github.com/aspnet/dnx/blob/1.0.0-rc1-final/src/Microsoft.Dnx.Host/RuntimeBootstrapper.cs).
 
-Этот первый слой написанный на managed code. Он ответственен за:
+Этот первый слой из перечисленных написанный на managed code. Он ответственен за:
 
 1. [Создание LoaderContainer](https://github.com/aspnet/dnx/blob/1.0.0-rc1-final/src/Microsoft.Dnx.Host/Bootstrapper.cs#L29), который будет содержать необходимые ILoader'ы. ILoader'ы ответственны за загрузку сборки. Когда CLR будет просить LoaderContainer предоставить какую-либо сборку, он будет делать это используя его ILoader'ы.
 2. [Создание корневого ILoader'а](https://github.com/aspnet/dnx/blob/1.0.0-rc1-final/src/Microsoft.Dnx.Host/Bootstrapper.cs#L32), который будет загружать требуемые сборки (из папки bin выбранного dnx runtime: %YOUR_PROFILE%/.dnx/runtimes/%CHOOSEN_RUNTIME%/bin/ и предоставленных во время запуска нативного процесса дополнительных путей, с помощью параметра `--lib`).
