@@ -7,17 +7,15 @@ published: draft
 
 ## Вступление от переводчика ##
 
-Данная статья является переводом [ASP.NET 5 - A Deep Dive into the ASP.NET 5 Runtime](https://msdn.microsoft.com/en-us/magazine/dn913182.aspx) - введения в архитектуру DNX Runtime и построенного на нем ASP.NET 5. К сожалению, так как оригинальная статья была написана в марте 2015 года, во время когда ASP.NET 5 был еще в стадии активной разработки (примерно beta 3), многое в ней устарело. Поэтому при переводе вся информация была актуализирована до текущей версии ASP.NET 5 (RC1), также были добавлены ссылки на связанные ресурсы и исходный код на GitHub (так как исходный код самая лучшая документация). Приятного погружения!
+Данная статья является переводом [ASP.NET 5 - A Deep Dive into the ASP.NET 5 Runtime](https://msdn.microsoft.com/en-us/magazine/dn913182.aspx) - введения в архитектуру DNX Runtime и построенного на нем ASP.NET 5. К сожалению, так как оригинальная статья была написана в марте 2015 года, во время когда ASP.NET 5 был еще в стадии активной разработки (примерно beta 3), многое в ней устарело. Поэтому при переводе вся информация была актуализирована до текущей версии ASP.NET 5 (RC1), также были добавлены ссылки на связанные ресурсы и исходный код на GitHub (для случаев, когда может быть интересна реализация). Приятного погружения!
 
 ## .NET Runtime Environment (DNX) ##
 
-ASP.NET базируется на гибком, кроссплатформенном Runtime, который может работать с разными .NET CLR (.NET Core, Mono, .NET Framework). Вы можете запустить ASP.NET 5 на полном .NET Framework или можете запустить на новом [.NET Core](https://docs.asp.net/en/latest/conceptual-overview/dotnetcore.html), который позволяет вам просто копировать его в существующее окружение, без изменения чего-либо еще на вашей машине. Используя .NET Core вы также можете запустить ASP.NET 5 кроссплатформенно на [Linux](https://docs.asp.net/en/latest/getting-started/installing-on-linux.html) и [Mac OS](https://docs.asp.net/en/latest/getting-started/installing-on-mac.html).
+ASP.NET базируется на гибком, кроссплатформенном runtime, который может работать с разными .NET CLR (.NET Core CLR, Mono CLR, .NET Framework CLR). Вы можете запустить ASP.NET 5 используя полный .NET Framework или можете запустить используя новый .NET Core [(docs.asp.net: Introducing .NET Core)](https://docs.asp.net/en/latest/conceptual-overview/dotnetcore.html), который позволяет вам просто копировать все необходимые библиотеки вместе с приложением в существующее окружение, без изменения чего-либо еще на вашей машине. Используя .NET Core вы также можете запустить ASP.NET 5 кроссплатформенно на Linux [(docs.asp.net: Installing ASP.NET 5 On Linux)](https://docs.asp.net/en/latest/getting-started/installing-on-linux.html) и Mac OS [(docs.asp.net: Installing ASP.NET 5 On Mac OS X)](https://docs.asp.net/en/latest/getting-started/installing-on-mac.html).
 
 <!--excerpt-->
 
-Инфраструктура позволяющая запускать и исполнять приложения ASP.NET 5 называется [.NET Runtime Environment или DNX](https://docs.asp.net/en/latest/dnx/overview.html). DNX предоставляет все что необходимо для работы .NET приложений: host process, CLR hosting логику, обнаружение управляемой Entry Point и т.д.
-
-DNX базируется на том же самом .NET CLR и базовой библиотеке классов, что знают и любят существующие .NET разработчики и в то же время он разработан с возможностью запускать приложения (на данный момент веб и консольные) под операционными системами отличными от Windows.
+Инфраструктура позволяющая запускать и исполнять приложения ASP.NET 5 называется .NET Runtime Environment или кратко DNX [(docs.asp.net: DNX Overview)](https://docs.asp.net/en/latest/dnx/overview.html). DNX предоставляет все что необходимо для работы .NET приложений: host process, CLR hosting логику, обнаружение управляемой Entry Point и т.д.
 
 Логически архитектура DNX имеет пять слоев. Я опишу каждый из этих слоев вместе с их обязанностями.
 
@@ -27,7 +25,7 @@ DNX базируется на том же самом .NET CLR и базовой 
 
 ## Слой первый: Нативный процесс  ## 
 
-Нативный процесс (имеется в виду процесс операционной системы) - это очень тонкий слой с обязанностью найти и вызвать нативный CLR host, передав в него аргументы переданные в сам процесс. В Windows - это dnx.exe (находится в %YOUR_PROFILE%/.dnx/runtimes/%CHOOSEN_RUNTIME%). В Mac и Linux - это запускаемый bash script (тоже с именем dnx). [Запуск на IIS](https://docs.asp.net/en/latest/publishing/iis.html) происходит с помощью устанавливаемого на IIS нативного HTTP-модуля: [HTTPPlatformHandler](https://azure.microsoft.com/en-us/blog/announcing-the-release-of-the-httpplatformhandler-module-for-iis-8/) (который в итоге тоже запустит dnx.exe). Использование HTTPPlatformHandler позволяет запускать веб-приложение без любых зависимостей от .NET Framework (естественно, при запуске веб-приложений нацеленных на .NET Core, а не на полный .NET Framework).
+Нативный процесс (имеется в виду процесс операционной системы) - это очень тонкий слой с обязанностью найти и вызвать нативный CLR host, передав в него аргументы переданные в сам процесс. В Windows - это dnx.exe (находится в %YOUR_PROFILE%/.dnx/runtimes/%CHOOSEN_RUNTIME%). В Mac и Linux - это запускаемый bash script (тоже с именем dnx). Запуск на IIS [(docs.asp.net: Publishing to IIS)](https://docs.asp.net/en/latest/publishing/iis.html) происходит с помощью устанавливаемого на IIS нативного HTTP-модуля: [HTTPPlatformHandler](https://azure.microsoft.com/en-us/blog/announcing-the-release-of-the-httpplatformhandler-module-for-iis-8/) (который в итоге тоже запустит dnx.exe). Использование HTTPPlatformHandler позволяет запускать веб-приложение на IIS без любых зависимостей от .NET Framework (естественно, при запуске веб-приложений нацеленных на .NET Core, а не на полный .NET Framework).
 
 >Примечание: DNX приложения (и консольные и веб-приложения ASP.NET 5) исполняются в адресном пространстве этого нативного процесса.
 
@@ -35,30 +33,28 @@ DNX базируется на том же самом .NET CLR и базовой 
 
 Имеют три главных обязанности:
 
-1. Запустить CLR. Способы достижения этого отличаются в зависимости от используемой версии CLR. Например, для запуска .NET Core загружается coreclr.dll, настраивается и запускается runtime и создается домен приложений, в котором будет запускаться весь managed code. Для Mono и .NET Framework, процесс отчасти различается, но результат будет тот же самый.
+1. Запустить CLR. Способы достижения этого отличаются в зависимости от используемой версии CLR, но результат будет тот же самый.
 2. Начать выполнение кода четвертого слоя (Управляемая Entry Point) в CLR.
-3. Когда нативный CLR хост возвращает управление, он будет "убирать за собой" и выключать CLR - выгружать домен приложений и останавливать runtime.
+3. Когда нативный CLR host возвращает управление, он будет "убирать за собой" и выключать CLR.
 
 ## Слой четвертый: Управляемая Entry Point ##
 
-> Примечание:  В целом логика этого слоя находится в [Microsoft.DNX.Host](https://github.com/aspnet/dnx/tree/1.0.0-rc1-final/src/Microsoft.Dnx.Host). Entry Point этого слоя можно считать [RuntimeBootstrapper](https://github.com/aspnet/dnx/blob/1.0.0-rc1-final/src/Microsoft.Dnx.Host/RuntimeBootstrapper.cs).
+> Примечание:  В целом логика этого слоя находится в сборке Microsoft.DNX.Host [(github.com/aspnet/dnx: Microsoft.DNX.Host)](https://github.com/aspnet/dnx/tree/1.0.0-rc1-final/src/Microsoft.Dnx.Host). Entry Point этого слоя можно считать RuntimeBootstrapper [(github.com/aspnet/dnx: Microsoft.DNX.Host/RuntimeBootstrapper.cs](https://github.com/aspnet/dnx/blob/1.0.0-rc1-final/src/Microsoft.Dnx.Host/RuntimeBootstrapper.cs).
 
 Этот первый слой в котором работа DNX приложения переходит к выполнению управляемого кода (отсюда и его название). Он ответственен за:
 
-1. [Создание LoaderContainer](https://github.com/aspnet/dnx/blob/1.0.0-rc1-final/src/Microsoft.Dnx.Host/Bootstrapper.cs#L29), который будет содержать необходимые ILoader'ы. ILoader'ы ответственны за загрузку сборки. Когда CLR будет просить LoaderContainer предоставить какую-либо сборку, он будет делать это используя его ILoader'ы.
-2. [Создание корневого ILoader'а](https://github.com/aspnet/dnx/blob/1.0.0-rc1-final/src/Microsoft.Dnx.Host/Bootstrapper.cs#L32), который будет загружать требуемые сборки (из папки bin выбранного dnx runtime: %YOUR_PROFILE%/.dnx/runtimes/%CHOOSEN_RUNTIME%/bin/ и предоставленных во время запуска нативного процесса дополнительных путей, с помощью параметра `--lib`).
-3. [Настройку IApplicationEnvironment и ядра инфраструктуры системы Dependency Injection](https://github.com/aspnet/dnx/blob/dev/src/Microsoft.Dnx.Host/Bootstrapper.cs#L59-L70).
-4. [Вызов entry point](https://github.com/aspnet/dnx/blob/dev/src/Microsoft.Dnx.Host/Bootstrapper.cs#L80) конкретного приложения или [Microsoft.DNX.ApplicationHost](https://github.com/aspnet/dnx/blob/1.0.0-rc1-final/src/Microsoft.Dnx.ApplicationHost/Program.cs).
-
-В этом слое сборки загружаются только из каталога bin выбранного dnx runtime (%YOUR_PROFILE%/.dnx/runtimes/%CHOOSEN_RUNTIME%/bin/) или указанных с помощью параметра `--lib` при запуске нативного процесса дополнительных путей. Есть следующий слой, что добавляет дополнительные загрузчики для разрешения зависимостей из NuGet пакетов или даже кода скомпилированного во время выполнения.
+1. Создание LoaderContainer [(github.com/aspnet/dnx: Microsoft.Dnx.Host/Bootstrapper.cs#L29)](https://github.com/aspnet/dnx/blob/1.0.0-rc1-final/src/Microsoft.Dnx.Host/Bootstrapper.cs#L29), который будет содержать ILoader'ы. ILoader'ы ответственны за загрузку сборки. Когда CLR будет просить LoaderContainer предоставить какую-либо сборку, он будет делать это используя его ILoader'ы.
+2. Создание корневого ILoader'а [(github.com/aspnet/dnx: Microsoft.Dnx.Host/Bootstrapper.cs#L32)](https://github.com/aspnet/dnx/blob/1.0.0-rc1-final/src/Microsoft.Dnx.Host/Bootstrapper.cs#L32), который будет загружать требуемые сборки из папки bin выбранного dnx runtime: %YOUR_PROFILE%/.dnx/runtimes/%CHOOSEN_RUNTIME%/bin/ и предоставленных во время запуска нативного процесса дополнительных путей, с помощью параметра `--lib`: `dnx --lib <LIB_PATHS>`).
+3. Настройку IApplicationEnvironment и ядра инфраструктуры системы Dependency Injection [(github.com/aspnet/dnx: Microsoft.Dnx.Host/Bootstrapper.cs#L59-L70)](https://github.com/aspnet/dnx/blob/dev/src/Microsoft.Dnx.Host/Bootstrapper.cs#L59-L70).
+4. Вызов entry point [(github.com/aspnet/dnx: Microsoft.Dnx.Host/Bootstrapper.cs#L80)](https://github.com/aspnet/dnx/blob/dev/src/Microsoft.Dnx.Host/Bootstrapper.cs#L80) конкретного приложения или Microsoft.DNX.ApplicationHost [(github.com/aspnet/dnx: Microsoft.Dnx.ApplicationHost/Program.cs)](https://github.com/aspnet/dnx/blob/1.0.0-rc1-final/src/Microsoft.Dnx.ApplicationHost/Program.cs), в зависимости от параметров переданных в нативный процесс во время запуска приложения.
 
 ## Слой пятый: Application Host ##
+ 
+Microsoft.DNX.ApplicationHost [(github.com/aspnet/dnx: Microsoft.Dnx.ApplicationHost)](https://github.com/aspnet/dnx/tree/1.0.0-rc1-final/src/Microsoft.Dnx.ApplicationHost) - это хост приложения поставляемый вместе с DNX. В его обязанности входит:
 
-[Microsoft.DNX.ApplicationHost](https://github.com/aspnet/dnx/tree/1.0.0-rc1-final/src/Microsoft.Dnx.ApplicationHost) - это application host поставляемый вместе с DNX. В его обязанности входит:
-
-1. Просмотреть зависимости указанные в project.json и загрузить их. Логика обхода зависимостей описана более детально в статье [Dependency-Resolution](https://github.com/aspnet/Home/wiki/Dependency-Resolution).
-2. Добавление дополнительных загрузчиков сборок, которые могут загружать сборки из различных источников, таких как установленные NuGet пакеты, исходники компилируемые в runtime, используя Roslyn, и т.д.
-3. [Вызов entry point](https://github.com/aspnet/dnx/blob/1.0.0-rc1-final/src/Microsoft.Dnx.ApplicationHost/Program.cs#L230-L240) вашей сборки или сборки [Microsoft.AspNet.Hosting](https://github.com/aspnet/Hosting/blob/1.0.0-rc1/src/Microsoft.AspNet.Hosting/Program.cs) в случае веб-приложения (которая знает как найти Startup.cs файл и вызвать Configure методы). Сборка может быть чем угодно имеющим entry point, [которую Application Host знает как загрузить](https://github.com/aspnet/dnx/blob/1.0.0-rc1-final/src/Microsoft.Dnx.Runtime.Sources/Impl/EntryPointExecutor.cs#L20). Приходящий вместе с DNX Application Host [знает как найти](https://github.com/aspnet/dnx/blob/1.0.0-rc1-final/src/Microsoft.Dnx.Runtime.Sources/Impl/EntryPointExecutor.cs#L70-L110) `public static void Main` метод.
+1. Добавление дополнительных загрузчиков сборок (ILoader'ы) в LoaderContainer [(github.com/aspnet/dnx: Microsoft.Dnx.ApplicationHost/Program.cs#L72)](https://github.com/aspnet/dnx/blob/1.0.0-rc1-final/src/Microsoft.Dnx.ApplicationHost/Program.cs#L72), которые могут загружать сборки из различных источников, таких как установленные NuGet пакеты и исходники компилируемые в runtime, используя Roslyn, и т.д.
+2. Просмотреть зависимости указанные в project.json и загрузить их. Логика обхода зависимостей описана более детально в статье [Dependency-Resolution](https://github.com/aspnet/Home/wiki/Dependency-Resolution).
+3. Вызов entry point [(github.com/aspnet/dnx: Microsoft.Dnx.ApplicationHost/Program.cs#L230-L240)](https://github.com/aspnet/dnx/blob/1.0.0-rc1-final/src/Microsoft.Dnx.ApplicationHost/Program.cs#L230-L240) вашей сборки, в случае консольного приложения или сборки Microsoft.AspNet.Hosting [(github.com/aspnet/Hosting: Microsoft.AspNet.Hosting/Program.cs)](https://github.com/aspnet/Hosting/blob/1.0.0-rc1/src/Microsoft.AspNet.Hosting/Program.cs) в случае веб-приложения. Сборка может быть чем угодно имеющим entry point, которую ApplicationHost знает как вызвать [(github.com/aspnet/dnx: Microsoft.Dnx.Runtime.Sources/Impl/EntryPointExecutor.cs#L20)](https://github.com/aspnet/dnx/blob/1.0.0-rc1-final/src/Microsoft.Dnx.Runtime.Sources/Impl/EntryPointExecutor.cs#L20). Приходящий вместе с DNX ApplicationHost знает как найти [github.com/aspnet/dnx: Microsoft.Dnx.Runtime.Sources/Impl/EntryPointExecutor.cs#L70-L110](https://github.com/aspnet/dnx/blob/1.0.0-rc1-final/src/Microsoft.Dnx.Runtime.Sources/Impl/EntryPointExecutor.cs#L70-L110) `public static void Main` метод.
 
 ## Кроссплатформенныe SDK Tools ##
 
