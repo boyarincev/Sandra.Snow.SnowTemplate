@@ -1,4 +1,4 @@
-@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<Snow.ViewModels.PostViewModel>
+п»ї@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<Snow.ViewModels.PostViewModel>
 @using System.Collections.Generic
 @using Snow.Enums
 @{
@@ -17,27 +17,28 @@
         </ul>
     </div>
 
-    <div class="addthis_toolbox addthis_default_style" style="float:right;">
+    @*<div class="addthis_toolbox addthis_default_style" style="float:right;">
         <a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
         <a class="addthis_button_tweet"></a>
         <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
         <a class="addthis_button_linkedin_counter"></a>
-        @*<a class="addthis_counter addthis_pill_style"></a>*@
-    </div>
+        <a class="addthis_counter addthis_pill_style"></a>
+    </div>*@
 </div>
 
 @Html.RenderSeries()
 
+@Html.Raw(Model.PostContent)
+
 <div>
-    Если вы хотите получать уведомления о новых статьях в блоге, то подпишитесь на <a href="https://twitter.com/boyarincev">мой twitter</a>.
+    <b>Р•СЃР»Рё РІС‹ С…РѕС‚РёС‚Рµ РїРѕР»СѓС‡Р°С‚СЊ СѓРІРµРґРѕРјР»РµРЅРёСЏ Рѕ РЅРѕРІС‹С… СЃС‚Р°С‚СЊСЏС…, С‚Рѕ РїРѕРґРїРёСЃС‹РІР°Р№С‚РµСЃСЊ РЅР° <a href="https://twitter.com/boyarincev">РјРѕР№ twitter</a>.</b>
 </div>
 
-@Html.Raw(Model.PostContent)
 @if (Model.Published == Published.True)
 {
     @Html.RenderDisqusComments("boyarincev")
 }
 
-<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-****"></script>
+@*<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-****"></script>*@
 
 </div>
