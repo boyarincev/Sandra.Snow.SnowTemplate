@@ -2,37 +2,42 @@
 @using System.Collections.Generic
 @using Snow.Enums
 @{
-  Layout = "default.cshtml";
+    Layout = "default.cshtml";
 }
 
 <div class="post">
-    <h1>@Model.Title</h1> 
-      <div class="meta">
+    <h1>@Model.Title</h1>
+    <div class="meta">
         <p class="posted">@Model.PostDate.ToString("dd MMM yyyy")</p>
         <ul class="categories">
-        @foreach(var category in Model.Categories) {
-          <li><a href="/category/@category.Url" title="@category">@category.Name</a></li>
-        }
+            @foreach (var category in Model.Categories)
+            {
+                <li><a href="/category/@category.Url" title="@category">@category.Name</a></li>
+            }
         </ul>
-      </div>
+    </div>
 
-      <!--div class="addthis_toolbox addthis_default_style" style="float:right;">
+    <div class="addthis_toolbox addthis_default_style" style="float:right;">
         <a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
         <a class="addthis_button_tweet"></a>
         <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
         <a class="addthis_button_linkedin_counter"></a>
-        <a class="addthis_counter addthis_pill_style"></a>
-      </div-->
+        @*<a class="addthis_counter addthis_pill_style"></a>*@
     </div>
-    
-    @Html.RenderSeries()
-        
-    @Html.Raw(Model.PostContent)
-    @if (Model.Published == Published.True)
-    {
-        @Html.RenderDisqusComments("boyarincev")
-    }
-    
-    @*<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-****"></script>*@
+</div>
+
+@Html.RenderSeries()
+
+<div>
+    ≈сли вы хотите получать уведомлени€ о новых стать€х в блоге, то подпишитесь на <a href="https://twitter.com/boyarincev">мой twitter</a>.
+</div>
+
+@Html.Raw(Model.PostContent)
+@if (Model.Published == Published.True)
+{
+    @Html.RenderDisqusComments("boyarincev")
+}
+
+<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-****"></script>
 
 </div>
