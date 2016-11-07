@@ -1,4 +1,1 @@
-Sandra.Snow.SnowTemplate
-========================
-
-A Snow Template you can Fork &amp; Rename, and use for your own blog website.
+Old version of my blog ([boyarincev.net](http://boyarincev.net)). Was built on Sandra Snow with Snow Template.
